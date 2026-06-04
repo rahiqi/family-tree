@@ -35,6 +35,24 @@ services:
       context: ./front
       dockerfile: Dockerfile
     container_name: treely-frontend
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.treely-front.rule=Host(`treely.ir`)
+      - traefik.http.routers.treely-front.tls=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.treely-front.entrypoints=web,websecure
+      - traefik.http.routers.treely-front.tls.certresolver=mydnschallenge
+      - traefik.http.middlewares.treely-front.headers.SSLRedirect=true
+      - traefik.http.middlewares.treely-front.headers.STSSeconds=315360000
+      - traefik.http.middlewares.treely-front.headers.browserXSSFilter=true
+      - traefik.http.middlewares.treely-front.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.treely-front.headers.forceSTSHeader=true
+      - traefik.http.middlewares.treely-front.headers.SSLHost=treely.ir
+      - traefik.http.middlewares.treely-front.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.treely-front.headers.STSPreload=true
+      - traefik.http.routers.treely-front.middlewares=treely-front@docker
+      - traefik.http.services.treely-front.loadbalancer.server.port=80
+      - "traefik.http.routers.treely-front.observability.tracing=true"  
     ports:
       - "5173:80"
     depends_on:

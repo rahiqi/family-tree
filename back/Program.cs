@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("http://localhost:5173", "http://localhost:3000","https://api.treely.ir");
+              .WithOrigins("http://localhost:5173", "http://localhost:3000","https://treely.ir");
     });
 });
 

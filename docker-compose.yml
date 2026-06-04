@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: treely-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=treely
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: treely-backend
+    ports:
+      - "5263:5263"
+    environment:
+      - ConnectionStrings__MongoConnection=mongodb://mongodb:27017
+      - DatabaseName=treely
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5263
+    volumes:
+      - backend_uploads:/app/wwwroot/uploads
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: treely-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local
+  backend_uploads:
+    driver: local

@@ -11,7 +11,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=treely
     restart: unless-stopped
-
+  
   backend:
     build:
       context: ./back
@@ -29,7 +29,24 @@ services:
     depends_on:
       - mongodb
     restart: unless-stopped
-
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.treely-back.rule=Host(`api.treely.ir`)
+      - traefik.http.routers.treely-back.tls=true
+      - traefik.docker.network=traefik_default
+      - traefik.http.routers.treely-back.entrypoints=web,websecure
+      - traefik.http.routers.treely-front.tls.certresolver=mydnschallenge
+      - traefik.http.middlewares.treely-back.headers.SSLRedirect=true
+      - traefik.http.middlewares.treely-back.headers.STSSeconds=315360000
+      - traefik.http.middlewares.treely-back.headers.browserXSSFilter=true
+      - traefik.http.middlewares.treely-back.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.treely-back.headers.forceSTSHeader=true
+      - traefik.http.middlewares.treely-back.headers.SSLHost=treely.ir
+      - traefik.http.middlewares.treely-back.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.treely-back.headers.STSPreload=true
+      - traefik.http.routers.treely-back.middlewares=treely-back@docker
+     # - traefik.http.services.treely-back.loadbalancer.server.port=80
+      - "traefik.http.routers.treely-front.observability.tracing=true" 
   frontend:
     build:
       context: ./front

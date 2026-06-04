@@ -41,7 +41,7 @@ services:
       - traefik.http.middlewares.treely-back.headers.browserXSSFilter=true
       - traefik.http.middlewares.treely-back.headers.contentTypeNosniff=true
       - traefik.http.middlewares.treely-back.headers.forceSTSHeader=true
-      - traefik.http.middlewares.treely-back.headers.SSLHost=treely.ir
+     # - traefik.http.middlewares.treely-back.headers.SSLHost=treely.ir
       - traefik.http.middlewares.treely-back.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.treely-back.headers.STSPreload=true
       - traefik.http.routers.treely-back.middlewares=treely-back@docker
@@ -67,7 +67,7 @@ services:
       - traefik.http.middlewares.treely-front.headers.browserXSSFilter=true
       - traefik.http.middlewares.treely-front.headers.contentTypeNosniff=true
       - traefik.http.middlewares.treely-front.headers.forceSTSHeader=true
-      - traefik.http.middlewares.treely-front.headers.SSLHost=treely.ir
+      #- traefik.http.middlewares.treely-front.headers.SSLHost=treely.ir
       - traefik.http.middlewares.treely-front.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.treely-front.headers.STSPreload=true
       - traefik.http.routers.treely-front.middlewares=treely-front@docker

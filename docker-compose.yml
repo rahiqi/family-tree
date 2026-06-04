@@ -11,7 +11,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=treely
     restart: unless-stopped
-
+  
   backend:
     build:
       context: ./back
@@ -24,23 +24,66 @@ services:
       - DatabaseName=treely
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5263
+    networks:
+      default:
+      traefik_default:  
     volumes:
       - backend_uploads:/app/wwwroot/uploads
     depends_on:
       - mongodb
     restart: unless-stopped
-
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.treely-back.rule=Host(`api.treely.ir`)
+      - traefik.http.routers.treely-back.tls=true
+      - traefik.docker.network=traefik_default
+      - traefik.http.routers.treely-back.entrypoints=web,websecure
+      - traefik.http.routers.treely-back.tls.certresolver=mydnschallenge
+      - traefik.http.middlewares.treely-back.headers.SSLRedirect=true
+      - traefik.http.middlewares.treely-back.headers.STSSeconds=315360000
+      - traefik.http.middlewares.treely-back.headers.browserXSSFilter=true
+      - traefik.http.middlewares.treely-back.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.treely-back.headers.forceSTSHeader=true
+     # - traefik.http.middlewares.treely-back.headers.SSLHost=treely.ir
+      - traefik.http.middlewares.treely-back.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.treely-back.headers.STSPreload=true
+      - traefik.http.routers.treely-back.middlewares=treely-back@docker
+      - traefik.http.services.treely-back.loadbalancer.server.port=5263
+      - "traefik.http.routers.treely-back.observability.tracing=true" 
   frontend:
     build:
       context: ./front
       dockerfile: Dockerfile
     container_name: treely-frontend
+    networks:
+      default:
+      traefik_default:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.treely-front.rule=Host(`treely.ir`)
+      - traefik.http.routers.treely-front.tls=true
+      - traefik.docker.network=traefik_default
+      - traefik.http.routers.treely-front.entrypoints=web,websecure
+      - traefik.http.routers.treely-front.tls.certresolver=mydnschallenge
+      - traefik.http.middlewares.treely-front.headers.SSLRedirect=true
+      - traefik.http.middlewares.treely-front.headers.STSSeconds=315360000
+      - traefik.http.middlewares.treely-front.headers.browserXSSFilter=true
+      - traefik.http.middlewares.treely-front.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.treely-front.headers.forceSTSHeader=true
+      #- traefik.http.middlewares.treely-front.headers.SSLHost=treely.ir
+      - traefik.http.middlewares.treely-front.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.treely-front.headers.STSPreload=true
+      - traefik.http.routers.treely-front.middlewares=treely-front@docker
+      - traefik.http.services.treely-front.loadbalancer.server.port=80
+      - "traefik.http.routers.treely-front.observability.tracing=true"  
     ports:
       - "5173:80"
     depends_on:
       - backend
     restart: unless-stopped
-
+networks:
+  traefik_default:
+    external: true
 volumes:
   mongodb_data:
     driver: local

@@ -37,12 +37,12 @@ services:
     container_name: treely-frontend
     networks:
       default:
-      traefik:
+      traefik_default:
     labels:
       - traefik.enable=true
       - traefik.http.routers.treely-front.rule=Host(`treely.ir`)
       - traefik.http.routers.treely-front.tls=true
-      - traefik.docker.network=traefik
+      - traefik.docker.network=traefik_default
       - traefik.http.routers.treely-front.entrypoints=web,websecure
       - traefik.http.routers.treely-front.tls.certresolver=mydnschallenge
       - traefik.http.middlewares.treely-front.headers.SSLRedirect=true
@@ -62,7 +62,7 @@ services:
       - backend
     restart: unless-stopped
 networks:
-  traefik:
+  traefik_default:
     external: true
 volumes:
   mongodb_data:

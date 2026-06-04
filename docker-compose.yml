@@ -45,7 +45,7 @@ services:
       - traefik.http.middlewares.treely-back.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.treely-back.headers.STSPreload=true
       - traefik.http.routers.treely-back.middlewares=treely-back@docker
-     # - traefik.http.services.treely-back.loadbalancer.server.port=80
+      - traefik.http.services.treely-back.loadbalancer.server.port=5263
       - "traefik.http.routers.treely-back.observability.tracing=true" 
   frontend:
     build:

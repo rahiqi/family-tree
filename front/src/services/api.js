@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5263/api'; // Standard port for ASP.NET Web API
+const API_BASE_URL = 'https://api.treely.ir/api'; // Standard port for ASP.NET Web API
 
 // Helper to get token
 const getAuthHeaders = () => {

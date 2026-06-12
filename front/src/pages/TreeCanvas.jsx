@@ -9,6 +9,8 @@ import {
 import * as f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import { api } from '../services/api';
+import DatePicker from '../components/DatePicker';
+
 
 function TreeCanvas() {
   const { treeId } = useParams();
@@ -18,12 +20,12 @@ function TreeCanvas() {
   const containerRef = useRef(null);
   const chartInstanceRef = useRef(null);
   
-  const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'dark');
+  const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'light');
 
   // Listen to global theme change events
   useEffect(() => {
     const handleThemeChange = () => {
-      setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+      setTheme(document.documentElement.getAttribute('data-theme') || 'light');
     };
     window.addEventListener('theme-change', handleThemeChange);
     return () => {
@@ -58,6 +60,12 @@ function TreeCanvas() {
     birthday: ''
   });
 
+  // Modal Datepicker for canvas editor
+  const [modalDatePickerOpen, setModalDatePickerOpen] = useState(false);
+  const [modalDatePickerValue, setModalDatePickerValue] = useState('');
+  const [targetInputEl, setTargetInputEl] = useState(null);
+
+
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   // 1. Fetch Tree details
@@ -83,7 +91,30 @@ function TreeCanvas() {
     }
   };
 
+  // 1b. Intercept click/focus on family-chart birthday input to open custom datepicker
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      const input = e.target.closest('#FamilyChart .f3-form input[name="birthday"]') || 
+                    e.target.closest('#FamilyChart .f3-form-cont input[name="birthday"]') ||
+                    e.target.closest('.f3-form input[name="birthday"]');
+      if (input) {
+        e.preventDefault();
+        e.stopPropagation();
+        setTargetInputEl(input);
+        setModalDatePickerValue(input.value || '');
+        setModalDatePickerOpen(true);
+        input.blur();
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick, true);
+    return () => {
+      document.removeEventListener('click', handleGlobalClick, true);
+    };
+  }, []);
+
   // 2. Instantiate family-chart v2 inside useEffect
+
   useEffect(() => {
     if (loading || !containerRef.current || treeData.length === 0) return;
 
@@ -285,7 +316,8 @@ function TreeCanvas() {
             { id: 'first name', label: t('first_name'), type: 'text' },
             { id: 'last name', label: t('last_name'), type: 'text' },
             { id: 'gender', label: t('role'), type: 'select', options: [{ value: 'M', label: 'Male' }, { value: 'F', label: 'Female' }] },
-            { id: 'birthday', label: 'Birthday', type: 'text' }
+            { id: 'birthday', label: i18n.language === 'fa' ? 'تاریخ تولد' : 'Birthday', type: 'text' }
+
           ])
           .setEditFirst(true)
           .setLinkExistingRelConfig({
@@ -454,7 +486,46 @@ function TreeCanvas() {
     }
   };
 
+  const isPermissionError = error && (
+    error.toLowerCase().includes('forbidden') || 
+    error.toLowerCase().includes('unauthorized') || 
+    error.toLowerCase().includes('permission') || 
+    error.toLowerCase().includes('access')
+  );
+
+  if (isPermissionError) {
+    return (
+      <div className="flex-center" style={{ height: '80vh', flexDirection: 'column', padding: '2rem', textAlign: 'center', fontFamily: 'Vazirmatn, sans-serif' }}>
+        <motion.div
+          className="auth-card"
+          style={{ maxWidth: '440px', padding: '3rem', borderRadius: 'var(--radius-lg)' }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>🔒</span>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>
+            {i18n.language === 'fa' ? 'دسترسی محدود شده است' : 'Access Restricted'}
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+            {i18n.language === 'fa'
+              ? 'این شجره‌نامه خصوصی است. لطفاً برای مشاهده آن وارد حساب کاربری خود که دسترسی همکاری دارد شوید.'
+              : 'This family tree is private. Please log in with an authorized collaborator account to view it.'}
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <Link to="/auth/login" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
+              {t('login')}
+            </Link>
+            <Link to="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.5rem' }}>
+              {i18n.language === 'fa' ? 'صفحه اصلی' : 'Go Home'}
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="tree-container" style={{ flexDirection: 'column' }}>
       {/* Top Bar / Header */}
       <div className="canvas-header-bar">
@@ -603,15 +674,14 @@ function TreeCanvas() {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Birthday (YYYY-MM-DD)</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. 1960-05-15"
+                    <DatePicker
                       value={firstPerson.birthday}
-                      onChange={(e) => setFirstPerson({...firstPerson, birthday: e.target.value})}
+                      onChange={(val) => setFirstPerson({...firstPerson, birthday: val})}
+                      label={i18n.language === 'fa' ? 'تاریخ تولد' : 'Birthday'}
+                      placeholder={i18n.language === 'fa' ? 'مثال: ۱۳۷۰/۰۱/۰۱' : 'e.g. 1991-03-21'}
                     />
                   </div>
+
                 </div>
 
                 <button 
@@ -770,7 +840,109 @@ function TreeCanvas() {
         )}
       </AnimatePresence>
 
+      {/* DatePicker Modal Overlay for family-chart birthday input */}
+      <AnimatePresence>
+        {modalDatePickerOpen && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            fontFamily: 'Vazirmatn, sans-serif'
+          }}>
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              style={{
+                width: '100%',
+                maxWidth: '340px',
+                background: 'rgba(8, 12, 24, 0.98)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+                padding: '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                position: 'relative'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.5rem' }}>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {i18n.language === 'fa' ? 'انتخاب تاریخ تولد' : 'Select Birthday'}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setModalDatePickerOpen(false)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0.2rem'
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div style={{ marginTop: '0.5rem' }}>
+                <DatePicker
+                  value={modalDatePickerValue}
+                  inline={true}
+                  onChange={(val) => {
+                    setModalDatePickerValue(val);
+                    if (targetInputEl) {
+                      targetInputEl.value = val;
+                      // Trigger input and change events so D3 framework updates internal state
+                      targetInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                      targetInputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    setModalDatePickerOpen(false);
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (targetInputEl) {
+                      targetInputEl.value = '';
+                      targetInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                      targetInputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    setModalDatePickerOpen(false);
+                  }}
+                  style={{
+                    padding: '0.4rem 1rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {i18n.language === 'fa' ? 'پاک کردن' : 'Clear'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Helper role translator */}
+
       {/* Helper inline style for D3 layout cards */}
       <style>{`
         /* family-chart visual overrides */

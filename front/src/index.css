@@ -57,6 +57,19 @@
   --shadow-premium: 0 25px 50px -12px rgba(79, 70, 229, 0.08);
 }
 
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03) !important;
+}
+
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #0f172a 30%, #4f46e5 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+
 /* Canvas background color theme bindings */
 #FamilyChart, .canvas-pane, .canvas-pane svg {
   background-color: var(--bg-primary) !important;
@@ -1121,6 +1134,18 @@ body, input, select, textarea, button {
   .feature-card {
     padding: 1.5rem !important;
   }
+}
+
+/* Datepicker calendar icon styling */
+::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  transition: opacity 0.2s;
+}
+
+[data-theme="dark"] ::-webkit-calendar-picker-indicator {
+  filter: invert(0.9) hue-rotate(180deg);
 }
 
 

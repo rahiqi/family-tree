@@ -1,14 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Share2, Users, Eye, Globe, ChevronRight, ArrowRight, GitMerge, Shield, Compass, Calendar } from 'lucide-react';
+import { api } from '../services/api';
 
 function Landing() {
   const { t, i18n } = useTranslation();
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [publicTrees, setPublicTrees] = useState([]);
+  const [publicTreesLoading, setPublicTreesLoading] = useState(true);
 
   const isRtl = i18n.language === 'fa';
+
+  useEffect(() => {
+    fetchPublicTrees();
+  }, []);
+
+  const fetchPublicTrees = async () => {
+    try {
+      setPublicTreesLoading(true);
+      const data = await api.tree.getPublic();
+      setPublicTrees(data);
+    } catch (err) {
+      console.error("Failed to load public trees:", err);
+    } finally {
+      setPublicTreesLoading(false);
+    }
+  };
 
   // Demo interactive tree nodes
   const demoNodes = [
@@ -70,7 +89,7 @@ function Landing() {
         left: '20%',
         width: '400px',
         height: '400px',
-        background: 'radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 70%)',
+        background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%)',
         pointerEvents: 'none',
         zIndex: 0
       }}></div>
@@ -80,7 +99,7 @@ function Landing() {
         right: '15%',
         width: '500px',
         height: '500px',
-        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0) 70%)',
+        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0) 70%)',
         pointerEvents: 'none',
         zIndex: 0
       }}></div>
@@ -98,15 +117,15 @@ function Landing() {
               display: 'inline-flex', 
               alignItems: 'center', 
               gap: '0.5rem', 
-              background: 'rgba(255,255,255,0.03)', 
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--bg-secondary)', 
+              border: '1px solid var(--border-color)',
               padding: '0.5rem 1.25rem',
               borderRadius: '99px',
-              color: '#818cf8',
+              color: 'var(--accent)',
               fontSize: '0.85rem',
               fontWeight: 600,
               marginBottom: '2rem',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+              boxShadow: 'var(--shadow-sm)'
             }}>
               <span>✨</span>
               <span>{isRtl ? 'نسخه دوم پلتفرم مدیریت شجره‌نامه تریلی' : 'Treely V2 Family Tree SaaS is live'}</span>
@@ -140,18 +159,14 @@ function Landing() {
               height: '420px', 
               marginTop: '4rem',
               borderRadius: '24px',
-              background: 'rgba(11, 18, 32, 0.4)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.06)',
               position: 'relative',
-              overflow: 'hidden',
-              boxShadow: 'var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.05)'
+              overflow: 'hidden'
             }}
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            <div style={{ position: 'absolute', top: '1.25rem', insetInlineStart: '1.5rem', fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: '1.25rem', insetInlineStart: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></span>
               <span>{isRtl ? 'پیش‌نمایش تعاملی زنده شجره‌نامه' : 'Live Interactive Demo Canvas'}</span>
             </div>
@@ -167,23 +182,22 @@ function Landing() {
                     position: 'absolute',
                     bottom: '1.5rem',
                     insetInlineStart: '1.5rem',
-                    background: 'rgba(3, 7, 18, 0.85)',
-                    backdropFilter: 'blur(12px)',
-                    border: `1.5px solid ${hoveredNode.gender === 'M' ? '#38bdf8' : '#f472b6'}55`,
+                    background: 'var(--bg-secondary)',
+                    border: `1.5px solid ${hoveredNode.gender === 'M' ? '#38bdf8' : '#f472b6'}99`,
                     borderRadius: 'var(--radius-md)',
                     padding: '1rem 1.25rem',
                     width: '260px',
                     zIndex: 20,
-                    boxShadow: 'var(--shadow-md)',
+                    boxShadow: 'var(--shadow-lg)',
                     textAlign: 'start'
                   }}
                 >
                   <div style={{ fontSize: '0.7rem', color: hoveredNode.gender === 'M' ? '#38bdf8' : '#f472b6', fontWeight: 700, marginBottom: '0.25rem' }}>
                     {hoveredNode.gender === 'M' ? (isRtl ? 'عضو مرد 👨' : 'MALE MEMBER 👨') : (isRtl ? 'عضو زن 👩' : 'FEMALE MEMBER 👩')}
                   </div>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700 }}>{hoveredNode.name}</h4>
-                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '0.15rem' }}>📅 {hoveredNode.date}</p>
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '0.5rem', paddingTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>{hoveredNode.name}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.15rem' }}>📅 {hoveredNode.date}</p>
+                  <div style={{ borderTop: '1px solid var(--border-color)', marginTop: '0.5rem', paddingTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                     {hoveredNode.info}
                   </div>
                 </motion.div>
@@ -206,6 +220,7 @@ function Landing() {
               <path d="M 550,160 L 550,220" stroke="url(#link-grad)" strokeWidth="2.5" />
               <path d="M 400,120 L 400,280" stroke="url(#link-grad)" strokeWidth="2" strokeDasharray="4,4" />
               <path d="M 400,280 L 250,280" stroke="url(#link-grad)" strokeWidth="2" />
+              <path d="M 400,280 L 550,280" stroke="url(#link-grad)" strokeWidth="2" />
 
               {/* Draw Nodes dynamically */}
               {demoNodes.map((node) => {
@@ -244,7 +259,7 @@ function Landing() {
                       width="160" 
                       height="50" 
                       rx="10" 
-                      fill={isHovered ? 'rgba(15, 23, 42, 0.85)' : bg} 
+                      fill={isHovered ? 'var(--bg-secondary)' : bg} 
                       stroke={accent} 
                       strokeWidth={isHovered ? '2.5' : '1.5'} 
                       style={{ transition: 'all 0.3s ease' }}
@@ -253,7 +268,7 @@ function Landing() {
                       x="0" 
                       y="-2" 
                       textAnchor="middle" 
-                      fill="#f8fafc" 
+                      fill="var(--text-primary)" 
                       fontSize="12" 
                       fontWeight="600"
                     >
@@ -303,14 +318,14 @@ function Landing() {
                 color: '#818cf8', 
                 display: 'flex', 
                 alignItems: 'center', 
-                justifycontent: 'center', 
+                justifyContent: 'center', 
                 marginBottom: '1.5rem',
                 border: '1px solid rgba(99, 102, 241, 0.25)',
                 boxShadow: '0 0 15px rgba(99, 102, 241, 0.15)'
               }} className="flex-center">
                 <GitMerge size={24} />
               </div>
-              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: '#f8fafc', fontWeight: 700 }}>
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
                 {isRtl ? 'رابط کاربری شجره‌نامه تعاملی' : 'Interactive Family Engine'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.92rem' }}>
@@ -342,13 +357,13 @@ function Landing() {
               }} className="flex-center">
                 <Users size={24} />
               </div>
-              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: '#f8fafc', fontWeight: 700 }}>
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
                 {isRtl ? 'همکاری تیمی و اشتراک‌گذاری' : 'Collaborative Workspace'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.92rem' }}>
                 {isRtl 
                   ? 'اعضای فامیل را به عنوان مالک، ویرایشگر یا بیننده دعوت کنید تا با هم شجره‌نامه را کامل کنید.' 
-                  : 'Invite cousins, siblings, or parents to contribute to editing profiles and adding shared visual memory archives.'}
+                  : 'Invite members to collaborate under strict roles (owner, editor, visitor) keeping data unified and synced.'}
               </p>
             </motion.div>
 
@@ -372,15 +387,15 @@ function Landing() {
                 border: '1px solid rgba(16, 185, 129, 0.25)',
                 boxShadow: '0 0 15px rgba(16, 185, 129, 0.15)'
               }} className="flex-center">
-                <Globe size={24} />
+                <Share2 size={24} />
               </div>
-              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: '#f8fafc', fontWeight: 700 }}>
-                {isRtl ? 'طراحی دوزبانه بومی (فارسی/انگلیسی)' : 'Native Bilingual & RTL'}
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+                {isRtl ? 'خروجی یکپارچه و به اشتراک‌گذاری' : 'Export and Share'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.92rem' }}>
                 {isRtl 
-                  ? 'تغییر کامل چیدمان صفحات به صورت راست‌چین (RTL) و چپ‌چین (LTR) برای ثبت اطلاعات بین‌المللی.' 
-                  : 'Flawless logical alignments dynamically shifting structures between right-to-left Persian and left-to-right English.'}
+                  ? 'نمودار درختی شجرنامه را به صورت زنده و با یک دکمه منتشر کنید تا همه به راحتی به آن دسترسی داشته باشند.' 
+                  : 'Publish trees with public read access, generating beautiful viewable visual archives for families.'}
               </p>
             </motion.div>
 
@@ -406,7 +421,7 @@ function Landing() {
               }} className="flex-center">
                 <Shield size={24} />
               </div>
-              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: '#f8fafc', fontWeight: 700 }}>
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
                 {isRtl ? 'امنیت و حریم خصوصی پیشرفته' : 'Secure Permissions'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.92rem' }}>
@@ -437,7 +452,7 @@ function Landing() {
                     <Calendar size={18} />
                   </div>
                   <div>
-                    <h5 style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>{isRtl ? 'تایم‌لاین رویدادهای کرونولوژیکال' : 'Chronological Stepper'}</h5>
+                    <h5 style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>{isRtl ? 'تایم‌لاین رویدادهای کرونولوژیکال' : 'Chronological Stepper'}</h5>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{isRtl ? 'ثبت و مرتب‌سازی خودکار رویدادها بر اساس زمان وقوع.' : 'Events are sorted automatically by date and linked with a scrolling line indicator.'}</p>
                   </div>
                 </div>
@@ -447,7 +462,7 @@ function Landing() {
                     <Compass size={18} />
                   </div>
                   <div>
-                    <h5 style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>{isRtl ? 'عکس‌های پروفایل اختصاصی' : 'Dedicated Profile Avatars'}</h5>
+                    <h5 style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>{isRtl ? 'عکس‌های پروفایل اختصاصی' : 'Dedicated Profile Avatars'}</h5>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{isRtl ? 'امکان بارگذاری مستقیم عکس پروفایل یا انتخاب از آلبوم تصاویر بدون وابستگی.' : 'Upload profile-specific avatars or set profile photos directly from any album asset.'}</p>
                   </div>
                 </div>
@@ -455,7 +470,7 @@ function Landing() {
             </div>
 
             {/* Simulated Scrolling Timeline Graphic */}
-            <div className="glass-card" style={{ padding: '2.5rem', borderRadius: '20px', background: 'rgba(11, 18, 32, 0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="glass-card" style={{ padding: '2.5rem', borderRadius: '20px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
               <div className="timeline-track">
                 <div className="timeline-line" style={{ insetInlineStart: '12px' }}></div>
                 
@@ -464,8 +479,8 @@ function Landing() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۲۰/۰۲/۱۵' : '1941/05/05'}
                   </span>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
-                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
                 </div>
 
                 <div style={{ position: 'relative', paddingInlineStart: '2.5rem', marginBottom: '2rem' }}>
@@ -473,8 +488,8 @@ function Landing() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۴۵/۰۶/۱۰' : '1966/09/01'}
                   </span>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
-                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
                 </div>
 
                 <div style={{ position: 'relative', paddingInlineStart: '2.5rem' }}>
@@ -482,12 +497,86 @@ function Landing() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۷۷/۱۰/۱۲' : '1998/12/30'}
                   </span>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>
-                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل.' : 'Passed away leaving behind a robust heritage legacy.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل.' : 'Passed away leaving behind a robust heritage legacy.'}</p>
                 </div>
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Public Trees Showcase Section */}
+        <section style={{ borderTop: '1px solid var(--border-color)', marginTop: '4rem', paddingTop: '4rem', textAlign: 'start' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="text-gradient" style={{ fontSize: '2rem', fontWeight: 800 }}>
+              {isRtl ? 'شجره‌نامه‌های عمومی کاربران' : 'Public Family Trees'}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '0.75rem', fontSize: '1rem' }}>
+              {isRtl 
+                ? 'شجره‌نامه‌هایی که توسط صاحبان آن‌ها به اشتراک گذاشته شده و قابل مشاهده برای عموم هستند.' 
+                : 'Browse family trees shared publicly by the community.'}
+            </p>
+          </div>
+
+          {publicTreesLoading ? (
+            <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-secondary)' }}>
+              <div className="loading-spinner"></div>
+              <p style={{ marginTop: '1rem' }}>{isRtl ? 'در حال بارگذاری شجره‌نامه‌ها...' : 'Loading public trees...'}</p>
+            </div>
+          ) : publicTrees.length === 0 ? (
+            <div style={{ 
+              backgroundColor: 'var(--bg-secondary)', 
+              border: '1px dashed var(--border-color)', 
+              borderRadius: 'var(--radius-lg)', 
+              padding: '3rem 2rem', 
+              textAlign: 'center' 
+            }}>
+              <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '1rem' }}>🌐</span>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                {isRtl ? 'هیچ شجره‌نامه عمومی در حال حاضر وجود ندارد.' : 'No public family trees are available right now.'}
+              </p>
+            </div>
+          ) : (
+            <div className="tree-grid animate-fade-in" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', display: 'grid', gap: '1.5rem' }}>
+              {publicTrees.map((tree, idx) => (
+                <motion.div
+                  key={tree.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.05 }}
+                >
+                  <Link to={`/tree/${tree.id}`} className="tree-card" style={{ textDecoration: 'none', display: 'block' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                        <div className="tree-card-title" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{tree.name}</div>
+                        <span className="badge badge-visitor" style={{ fontSize: '0.7rem' }}>🌐 {isRtl ? 'عمومی' : 'Public'}</span>
+                      </div>
+                      
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                        👤 {isRtl ? 'ایجادکننده:' : 'Owner:'} {tree.ownerName}
+                      </div>
+
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Calendar size={12} />
+                        <span>
+                          {isRtl ? 'آخرین به‌روزرسانی:' : 'Updated:'}{' '}
+                          {new Date(tree.updatedAt).toLocaleDateString(isRtl ? 'fa-IR' : 'en-US')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {isRtl ? 'مشاهده درخت' : 'View Tree'}
+                        <ChevronRight size={14} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </section>
 
       </div>

@@ -51,6 +51,18 @@ function Dashboard() {
     }
   };
 
+  const handleTogglePrivacy = async (e, treeId, currentIsPublic) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      setError('');
+      const updated = await api.tree.updatePrivacy(treeId, !currentIsPublic);
+      setTrees(prevTrees => prevTrees.map(t => t.id === treeId ? { ...t, isPublic: updated.isPublic } : t));
+    } catch (err) {
+      setError(err.message || 'Failed to update tree privacy.');
+    }
+  };
+
   const getRoleLabel = (role) => {
     if (role === 'owner') return t('owner');
     if (role === 'editor') return t('editor');
@@ -137,9 +149,50 @@ function Dashboard() {
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <div className="tree-card-title">{tree.name}</div>
-                            <span className={`badge ${getRoleClass(userRole)}`}>
-                              {getRoleLabel(userRole)}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              {userRole === 'owner' ? (
+                                <button
+                                  onClick={(e) => handleTogglePrivacy(e, tree.id, tree.isPublic)}
+                                  style={{
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0.2rem 0.5rem',
+                                    color: tree.isPublic ? 'var(--success)' : 'var(--text-tertiary)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    fontSize: '0.75rem',
+                                    transition: 'all 0.2s',
+                                    fontWeight: 500
+                                  }}
+                                  title={tree.isPublic ? (i18n.language === 'fa' ? 'عمومی (قابل مشاهده برای همه) - کلیک برای خصوصی کردن' : 'Public (visible to everyone) - Click to make Private') : (i18n.language === 'fa' ? 'خصوصی (فقط برای همکاران) - کلیک برای عمومی کردن' : 'Private (collaborators only) - Click to make Public')}
+                                >
+                                  <span>{tree.isPublic ? '🌐' : '🔒'}</span>
+                                  <span>{tree.isPublic ? (i18n.language === 'fa' ? 'عمومی' : 'Public') : (i18n.language === 'fa' ? 'خصوصی' : 'Private')}</span>
+                                </button>
+                              ) : (
+                                <span
+                                  style={{
+                                    padding: '0.2rem 0.5rem',
+                                    color: tree.isPublic ? 'var(--success)' : 'var(--text-tertiary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500
+                                  }}
+                                >
+                                  <span>{tree.isPublic ? '🌐' : '🔒'}</span>
+                                  <span>{tree.isPublic ? (i18n.language === 'fa' ? 'عمومی' : 'Public') : (i18n.language === 'fa' ? 'خصوصی' : 'Private')}</span>
+                                </span>
+                              )}
+                              <span className={`badge ${getRoleClass(userRole)}`}>
+                                {getRoleLabel(userRole)}
+                              </span>
+                            </div>
+
                           </div>
                           
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>

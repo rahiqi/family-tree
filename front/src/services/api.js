@@ -64,6 +64,7 @@ export const api = {
   tree: {
     getAll: () => request('/tree'),
     get: (treeId) => request(`/tree/${treeId}`),
+    getPublic: () => request('/tree/public'),
     create: (name) => 
       request('/tree', {
         method: 'POST',
@@ -74,6 +75,11 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify({ treeGraphJsonData: typeof graphData === 'string' ? graphData : JSON.stringify(graphData) })
       }),
+    updatePrivacy: (treeId, isPublic) =>
+      request(`/tree/${treeId}/privacy`, {
+        method: 'PUT',
+        body: JSON.stringify({ isPublic })
+      }),
     addCollaborator: (treeId, email, role) => 
       request(`/tree/${treeId}/collaborator`, {
         method: 'POST',
@@ -83,6 +89,7 @@ export const api = {
       request(`/tree/${treeId}/collaborator/${userId}`, {
         method: 'DELETE'
       }),
+
   },
   profile: {
     get: (treeId, personId) => request(`/tree/${treeId}/profile/${personId}`),

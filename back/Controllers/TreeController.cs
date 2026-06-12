@@ -93,6 +93,7 @@ public class TreeController : ControllerBase
         return CreatedAtAction(nameof(GetTree), new { treeId = tree.Id }, tree);
     }
 
+    [AllowAnonymous]
     [HttpGet("{treeId}")]
     public async Task<IActionResult> GetTree(Guid treeId)
     {
@@ -104,10 +105,14 @@ public class TreeController : ControllerBase
         }
 
         var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
-        if (collaborator == null)
+        
+        // If the tree is private and the user is not a collaborator, deny access
+        if (!tree.IsPublic && collaborator == null)
         {
             return Forbid("You do not have access to this family tree.");
         }
+
+        var userRole = collaborator?.Role ?? "visitor";
 
         return Ok(new
         {
@@ -116,9 +121,58 @@ public class TreeController : ControllerBase
             tree.UpdatedAt,
             tree.TreeGraphJsonData,
             tree.Collaborators,
-            UserRole = collaborator.Role
+            tree.IsPublic,
+            UserRole = userRole
         });
     }
+
+    public class UpdatePrivacyDto
+    {
+        public bool IsPublic { get; set; }
+    }
+
+    [AllowAnonymous]
+    [HttpGet("public")]
+    public async Task<IActionResult> GetPublicTrees()
+    {
+        var trees = await _context.FamilyTrees
+            .Where(t => t.IsPublic)
+            .OrderByDescending(t => t.UpdatedAt)
+            .Select(t => new
+            {
+                t.Id,
+                t.Name,
+                t.UpdatedAt,
+                OwnerName = t.Collaborators.Where(c => c.Role == "owner").Select(c => c.Email).FirstOrDefault() ?? "Unknown"
+            })
+            .ToListAsync();
+
+        return Ok(trees);
+    }
+
+    [HttpPut("{treeId}/privacy")]
+    public async Task<IActionResult> UpdateTreePrivacy(Guid treeId, [FromBody] UpdatePrivacyDto dto)
+    {
+        var userId = GetCurrentUserId();
+        var tree = await _context.FamilyTrees.FindAsync(treeId);
+        if (tree == null)
+        {
+            return NotFound("Family tree not found.");
+        }
+
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        if (collaborator == null || collaborator.Role != "owner")
+        {
+            return Forbid("Only the tree owner can change the privacy settings.");
+        }
+
+        tree.IsPublic = dto.IsPublic;
+        tree.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(tree);
+    }
+
 
     [HttpPut("{treeId}")]
     public async Task<IActionResult> UpdateTree(Guid treeId, [FromBody] UpdateTreeGraphDto dto)

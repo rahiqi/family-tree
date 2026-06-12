@@ -9,6 +9,8 @@ import {
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { api } from '../services/api';
+import DatePicker from '../components/DatePicker';
+
 
 // Import Swiper styles
 import 'swiper/css';
@@ -314,7 +316,46 @@ function ProfileView() {
     );
   }
 
+  const isPermissionError = error && (
+    error.toLowerCase().includes('forbidden') || 
+    error.toLowerCase().includes('unauthorized') || 
+    error.toLowerCase().includes('permission') || 
+    error.toLowerCase().includes('access')
+  );
+
+  if (isPermissionError) {
+    return (
+      <div className="flex-center" style={{ height: '80vh', flexDirection: 'column', padding: '2rem', textAlign: 'center', fontFamily: 'Vazirmatn, sans-serif' }}>
+        <motion.div
+          className="auth-card"
+          style={{ maxWidth: '440px', padding: '3rem', borderRadius: 'var(--radius-lg)' }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>🔒</span>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>
+            {i18n.language === 'fa' ? 'دسترسی محدود شده است' : 'Access Restricted'}
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+            {i18n.language === 'fa'
+              ? 'این شجره‌نامه خصوصی است. لطفاً برای مشاهده آن وارد حساب کاربری خود که دسترسی همکاری دارد شوید.'
+              : 'This family tree is private. Please log in with an authorized collaborator account to view it.'}
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <Link to="/auth/login" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
+              {t('login')}
+            </Link>
+            <Link to="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.5rem' }}>
+              {i18n.language === 'fa' ? 'صفحه اصلی' : 'Go Home'}
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="layout-container" style={{ paddingBottom: '6rem' }}>
       
       {/* Top back actions */}
@@ -516,16 +557,14 @@ function ProfileView() {
 
                 <div className="responsive-form-grid">
                   <div className="form-group">
-                    <label className="form-label">{isRtl ? 'تاریخ / سال' : 'Date / Year'}</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <DatePicker
                       value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
-                      placeholder={isRtl ? 'مثال: ۱۳۴۵/۰۶/۱۰ یا ۱۳۴۵' : 'e.g. 1966/09/01 or 1966'}
-                      required
+                      onChange={(val) => setEventDate(val)}
+                      label={isRtl ? 'تاریخ رویداد' : 'Event Date'}
+                      placeholder={isRtl ? 'انتخاب تاریخ...' : 'Select date...'}
                     />
                   </div>
+
 
                   <div className="form-group">
                     <label className="form-label">{isRtl ? 'نوع رویداد' : 'Event Type'}</label>

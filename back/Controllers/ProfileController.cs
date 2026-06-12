@@ -45,12 +45,21 @@ public class ProfileController : ControllerBase
         public List<TimelineEvent> TimelineEvents { get; set; } = new();
     }
 
+    [AllowAnonymous]
     [HttpGet("{personId}")]
     public async Task<IActionResult> GetProfile(Guid treeId, string personId)
     {
+        var tree = await _context.FamilyTrees.FindAsync(treeId);
+        if (tree == null)
+        {
+            return NotFound("Family tree not found.");
+        }
+
         var userId = GetCurrentUserId();
-        var role = await GetUserRoleAsync(treeId, userId);
-        if (role == null)
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        
+        // If the tree is private and the user is not a collaborator, deny access
+        if (!tree.IsPublic && collaborator == null)
         {
             return Forbid("You do not have access to this family tree.");
         }
@@ -73,6 +82,7 @@ public class ProfileController : ControllerBase
 
         return Ok(profile);
     }
+
 
     [HttpPost("{personId}")]
     public async Task<IActionResult> UpdateProfile(Guid treeId, string personId, [FromBody] UpdateProfileDto dto)

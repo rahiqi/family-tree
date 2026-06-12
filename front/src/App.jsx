@@ -12,7 +12,7 @@ import { CuteFamilyTreeLogo } from './components/CuteFamilyTreeLogo';
 
 function App() {
   const { t, i18n } = useTranslation();
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   // Set document direction when language changes
   useEffect(() => {
@@ -93,8 +93,8 @@ function App() {
           <Route path="/auth/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
           <Route path="/auth/register" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />} />
           <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/auth/login" />} />
-          <Route path="/tree/:treeId" element={isLoggedIn ? <TreeCanvas /> : <Navigate to="/auth/login" />} />
-          <Route path="/tree/:treeId/profile/:id" element={isLoggedIn ? <ProfileView /> : <Navigate to="/auth/login" />} />
+          <Route path="/tree/:treeId" element={<TreeCanvas />} />
+          <Route path="/tree/:treeId/profile/:id" element={<ProfileView />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

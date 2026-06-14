@@ -9,6 +9,7 @@ public class TreelyDbContext : DbContext
     public TreelyDbContext(DbContextOptions<TreelyDbContext> options)
         : base(options)
     {
+        Database.AutoTransactionBehavior = AutoTransactionBehavior.Never;
     }
 
     public DbSet<User> Users => Set<User>();

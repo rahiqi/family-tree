@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://api.treely.ir/api'; // Standard port for ASP.NET Web API
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5263/api'
+  : 'https://api.treely.ir/api';
 export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
 // Helper to get token

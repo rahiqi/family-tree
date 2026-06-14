@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Plus, Calendar, User, Users, ChevronRight, FileText, ArrowLeft, GitBranch } from 'lucide-react';
+import { Plus, Calendar, User, Users, ChevronRight, FileText, ArrowLeft, GitBranch, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
 
 function Dashboard() {
@@ -10,11 +10,14 @@ function Dashboard() {
   const navigate = useNavigate();
   const [trees, setTrees] = useState([]);
   const [newTreeName, setNewTreeName] = useState('');
+  const [newTreeIsPublic, setNewTreeIsPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const [createLoading, setCreateLoading] = useState(false);
   const [error, setError] = useState('');
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserId = currentUser.id || currentUser.Id;
+  const currentUserEmail = currentUser.email || currentUser.Email;
 
   useEffect(() => {
     fetchTrees();
@@ -24,7 +27,11 @@ function Dashboard() {
     try {
       setLoading(true);
       const data = await api.tree.getAll();
-      setTrees(data);
+      const mappedData = data.map(t => ({
+        ...t,
+        isPublic: t.isPublic ?? false
+      }));
+      setTrees(mappedData);
     } catch (err) {
       setError(err.message || 'Failed to load trees.');
     } finally {
@@ -39,9 +46,14 @@ function Dashboard() {
     try {
       setCreateLoading(true);
       setError('');
-      const created = await api.tree.create(newTreeName);
+      const created = await api.tree.create(newTreeName, newTreeIsPublic);
+      const mappedCreated = {
+        ...created,
+        isPublic: created.isPublic ?? false
+      };
       setNewTreeName('');
-      setTrees([created, ...trees]);
+      setNewTreeIsPublic(false);
+      setTrees([mappedCreated, ...trees]);
       // Navigate straight to the new tree canvas
       navigate(`/tree/${created.id}`);
     } catch (err) {
@@ -60,6 +72,46 @@ function Dashboard() {
       setTrees(prevTrees => prevTrees.map(t => t.id === treeId ? { ...t, isPublic: updated.isPublic } : t));
     } catch (err) {
       setError(err.message || 'Failed to update tree privacy.');
+    }
+  };
+
+  const handleDeleteTree = async (e, treeId, treeName) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const confirmMessage = t('delete_confirm', { name: treeName });
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      setLoading(true);
+      setError('');
+      await api.tree.delete(treeId);
+      setTrees(prevTrees => prevTrees.filter(t => t.id !== treeId));
+      
+      // Toast notification
+      const successToast = document.createElement('div');
+      successToast.innerHTML = t('delete_success');
+      successToast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--success);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 99px;
+        z-index: 9999;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        text-align: center;
+        font-size: 0.9rem;
+      `;
+      document.body.appendChild(successToast);
+      setTimeout(() => successToast.remove(), 3000);
+    } catch (err) {
+      setError(err.message || 'Failed to delete family tree.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,13 +164,13 @@ function Dashboard() {
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <GitBranch size={20} style={{ color: 'var(--accent)' }} />
-              {i18n.language === 'fa' ? 'شجره‌نامه‌های شما' : 'Your Family Trees'}
+              {t('your_trees')}
             </h2>
 
             {loading ? (
               <div style={{ padding: '4rem 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 <div className="loading-spinner"></div>
-                <p style={{ marginTop: '1rem' }}>{i18n.language === 'fa' ? 'در حال بارگذاری...' : 'Loading trees...'}</p>
+                <p style={{ marginTop: '1rem' }}>{t('loading_trees')}</p>
               </div>
             ) : trees.length === 0 ? (
               <div style={{ 
@@ -134,9 +186,10 @@ function Dashboard() {
             ) : (
               <div className="tree-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                 {trees.map((tree, idx) => {
-                  const userCollab = tree.collaborators?.find(c => c.userId?.toLowerCase() === currentUser.id?.toLowerCase()) || 
-                                     tree.collaborators?.find(c => c.email?.toLowerCase() === currentUser.email?.toLowerCase());
+                  const userCollab = tree.collaborators?.find(c => c.userId && currentUserId && c.userId.toLowerCase() === currentUserId.toLowerCase()) || 
+                                     tree.collaborators?.find(c => c.email && currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase());
                   const userRole = userCollab?.role || 'owner';
+                  const isPublic = !!tree.isPublic;
                   
                   return (
                     <motion.div
@@ -149,34 +202,56 @@ function Dashboard() {
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <div className="tree-card-title">{tree.name}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                               {userRole === 'owner' ? (
-                                <button
-                                  onClick={(e) => handleTogglePrivacy(e, tree.id, tree.isPublic)}
-                                  style={{
-                                    background: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    padding: '0.2rem 0.5rem',
-                                    color: tree.isPublic ? 'var(--success)' : 'var(--text-tertiary)',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.25rem',
-                                    fontSize: '0.75rem',
-                                    transition: 'all 0.2s',
-                                    fontWeight: 500
-                                  }}
-                                  title={tree.isPublic ? (i18n.language === 'fa' ? 'عمومی (قابل مشاهده برای همه) - کلیک برای خصوصی کردن' : 'Public (visible to everyone) - Click to make Private') : (i18n.language === 'fa' ? 'خصوصی (فقط برای همکاران) - کلیک برای عمومی کردن' : 'Private (collaborators only) - Click to make Public')}
-                                >
-                                  <span>{tree.isPublic ? '🌐' : '🔒'}</span>
-                                  <span>{tree.isPublic ? (i18n.language === 'fa' ? 'عمومی' : 'Public') : (i18n.language === 'fa' ? 'خصوصی' : 'Private')}</span>
-                                </button>
+                                <>
+                                  <button
+                                    onClick={(e) => handleTogglePrivacy(e, tree.id, isPublic)}
+                                    style={{
+                                      background: 'rgba(255, 255, 255, 0.05)',
+                                      border: '1px solid var(--border-color)',
+                                      borderRadius: 'var(--radius-sm)',
+                                      padding: '0.2rem 0.5rem',
+                                      color: isPublic ? 'var(--success)' : 'var(--text-tertiary)',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem',
+                                      fontSize: '0.75rem',
+                                      transition: 'all 0.2s',
+                                      fontWeight: 500
+                                    }}
+                                    title={isPublic ? (i18n.language === 'fa' ? 'عمومی (قابل مشاهده برای همه) - کلیک برای خصوصی کردن' : 'Public (visible to everyone) - Click to make Private') : (i18n.language === 'fa' ? 'خصوصی (فقط برای همکاران) - کلیک برای عمومی کردن' : 'Private (collaborators only) - Click to make Public')}
+                                  >
+                                    <span>{isPublic ? '🌐' : '🔒'}</span>
+                                    <span>{isPublic ? t('public') : t('private')}</span>
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => handleDeleteTree(e, tree.id, tree.name)}
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.08)',
+                                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                                      borderRadius: 'var(--radius-sm)',
+                                      padding: '0.2rem 0.4rem',
+                                      color: 'var(--danger)',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      fontSize: '0.75rem',
+                                      transition: 'all 0.2s',
+                                      fontWeight: 500
+                                    }}
+                                    title={t('delete')}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </>
                               ) : (
                                 <span
                                   style={{
                                     padding: '0.2rem 0.5rem',
-                                    color: tree.isPublic ? 'var(--success)' : 'var(--text-tertiary)',
+                                    color: isPublic ? 'var(--success)' : 'var(--text-tertiary)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.25rem',
@@ -184,8 +259,8 @@ function Dashboard() {
                                     fontWeight: 500
                                   }}
                                 >
-                                  <span>{tree.isPublic ? '🌐' : '🔒'}</span>
-                                  <span>{tree.isPublic ? (i18n.language === 'fa' ? 'عمومی' : 'Public') : (i18n.language === 'fa' ? 'خصوصی' : 'Private')}</span>
+                                  <span>{isPublic ? '🌐' : '🔒'}</span>
+                                  <span>{isPublic ? t('public') : t('private')}</span>
                                 </span>
                               )}
                               <span className={`badge ${getRoleClass(userRole)}`}>
@@ -198,7 +273,7 @@ function Dashboard() {
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                             <Calendar size={14} />
                             <span>
-                              {i18n.language === 'fa' ? 'آخرین به‌روزرسانی:' : 'Updated:'}{' '}
+                              {t('updated_label')}{' '}
                               {new Date(tree.updatedAt).toLocaleDateString(i18n.language === 'fa' ? 'fa-IR' : 'en-US')}
                             </span>
                           </div>
@@ -206,11 +281,13 @@ function Dashboard() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
                           <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            {i18n.language === 'fa' ? 'مشاهده و ویرایش' : 'View & Edit'}
+                            {t('view_and_edit')}
                             <ChevronRight size={14} style={{ transform: i18n.language === 'fa' ? 'rotate(180deg)' : 'none' }} />
                           </span>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-                            {tree.collaborators?.length || 1} {i18n.language === 'fa' ? 'عضو همکاری' : 'collab(s)'}
+                            {tree.collaborators?.length === 1 
+                              ? t('collab_count_one') 
+                              : t('collab_count_other', { count: tree.collaborators?.length || 1 })}
                           </span>
                         </div>
                       </Link>
@@ -245,9 +322,59 @@ function Dashboard() {
                     className="form-input"
                     value={newTreeName}
                     onChange={(e) => setNewTreeName(e.target.value)}
-                    placeholder={i18n.language === 'fa' ? 'نام درخت خانوادگی...' : 'e.g. Smith Family Tree'}
+                    placeholder={t('tree_name_placeholder')}
                     required
                   />
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label className="form-label" style={{ marginBottom: '0.4rem', display: 'block' }}>
+                    {t('access_level')}
+                  </label>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '0.25rem', 
+                    background: 'rgba(0,0,0,0.2)', 
+                    padding: '0.2rem', 
+                    borderRadius: 'var(--radius-sm)', 
+                    border: '1px solid var(--border-color)' 
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setNewTreeIsPublic(false)}
+                      style={{
+                        padding: '0.4rem 0',
+                        borderRadius: 'var(--radius-sm)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        background: !newTreeIsPublic ? 'var(--accent)' : 'transparent',
+                        color: !newTreeIsPublic ? 'white' : 'var(--text-secondary)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      🔒 {t('private')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewTreeIsPublic(true)}
+                      style={{
+                        padding: '0.4rem 0',
+                        borderRadius: 'var(--radius-sm)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        background: newTreeIsPublic ? 'var(--accent)' : 'transparent',
+                        color: newTreeIsPublic ? 'white' : 'var(--text-secondary)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      🌐 {t('public')}
+                    </button>
+                  </div>
                 </div>
 
                 <button 

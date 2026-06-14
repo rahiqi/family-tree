@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
-import { api } from '../services/api';
+import { api, API_ORIGIN } from '../services/api';
 import DatePicker from '../components/DatePicker';
 
 
@@ -21,6 +21,9 @@ function ProfileView() {
   const { treeId, id } = useParams(); // id is the personId from family-chart
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserId = currentUser.id || currentUser.Id;
 
   const [profile, setProfile] = useState(null);
   const [personNode, setPersonNode] = useState(null);
@@ -282,7 +285,7 @@ function ProfileView() {
     await saveTimelineEvents(updatedList);
   };
 
-  const canEdit = userRole === 'owner' || (userRole === 'editor' && personNode?.addedBy === currentUser.id);
+  const canEdit = userRole === 'owner' || (userRole === 'editor' && personNode?.addedBy && currentUserId && personNode.addedBy.toLowerCase() === currentUserId.toLowerCase());
   const isRtl = i18n.language === 'fa';
 
   // Identity Details
@@ -295,7 +298,7 @@ function ProfileView() {
   // Specific Avatar loader
   const getAvatarImage = () => {
     if (editedAvatarUrl) {
-      return `http://localhost:5263${editedAvatarUrl}`;
+      return `${API_ORIGIN}${editedAvatarUrl}`;
     }
     return null;
   };
@@ -334,19 +337,17 @@ function ProfileView() {
         >
           <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>🔒</span>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>
-            {i18n.language === 'fa' ? 'دسترسی محدود شده است' : 'Access Restricted'}
+            {t('private_tree_title')}
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-            {i18n.language === 'fa'
-              ? 'این شجره‌نامه خصوصی است. لطفاً برای مشاهده آن وارد حساب کاربری خود که دسترسی همکاری دارد شوید.'
-              : 'This family tree is private. Please log in with an authorized collaborator account to view it.'}
+            {t('private_tree_message')}
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link to="/auth/login" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
               {t('login')}
             </Link>
             <Link to="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.5rem' }}>
-              {i18n.language === 'fa' ? 'صفحه اصلی' : 'Go Home'}
+              {t('go_home')}
             </Link>
           </div>
         </motion.div>
@@ -743,7 +744,7 @@ function ProfileView() {
                   return (
                     <div key={idx} style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', height: '120px', border: '1.5px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
                       <img 
-                        src={`http://localhost:5263${photo.url}`} 
+                        src={`${API_ORIGIN}${photo.url}`} 
                         alt={photo.caption} 
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
@@ -868,7 +869,7 @@ function ProfileView() {
                 <SwiperSlide key={idx} style={{ width: 'auto' }}>
                   <div className="swiper-slide-custom">
                     <img 
-                      src={`http://localhost:5263${photo.url}`} 
+                      src={`${API_ORIGIN}${photo.url}`} 
                       alt={photo.caption} 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />

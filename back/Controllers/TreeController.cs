@@ -34,6 +34,7 @@ public class TreeController : ControllerBase
     public class CreateTreeDto
     {
         public string Name { get; set; } = string.Empty;
+        public bool IsPublic { get; set; } = false;
     }
 
     public class UpdateTreeGraphDto
@@ -74,6 +75,7 @@ public class TreeController : ControllerBase
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
+            IsPublic = dto.IsPublic,
             UpdatedAt = DateTime.UtcNow,
             Collaborators = new List<TreeCollaborator>
             {
@@ -107,7 +109,7 @@ public class TreeController : ControllerBase
         var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
         
         // If the tree is private and the user is not a collaborator, deny access
-        if (!tree.IsPublic && collaborator == null)
+        if (tree.IsPublic != true && collaborator == null)
         {
             return Forbid("You do not have access to this family tree.");
         }
@@ -121,7 +123,7 @@ public class TreeController : ControllerBase
             tree.UpdatedAt,
             tree.TreeGraphJsonData,
             tree.Collaborators,
-            tree.IsPublic,
+            IsPublic = tree.IsPublic ?? false,
             UserRole = userRole
         });
     }
@@ -136,7 +138,7 @@ public class TreeController : ControllerBase
     public async Task<IActionResult> GetPublicTrees()
     {
         var trees = await _context.FamilyTrees
-            .Where(t => t.IsPublic)
+            .Where(t => t.IsPublic == true)
             .OrderByDescending(t => t.UpdatedAt)
             .Select(t => new
             {
@@ -171,6 +173,35 @@ public class TreeController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(tree);
+    }
+
+    [HttpDelete("{treeId}")]
+    public async Task<IActionResult> DeleteTree(Guid treeId)
+    {
+        var userId = GetCurrentUserId();
+        var tree = await _context.FamilyTrees.FindAsync(treeId);
+        if (tree == null)
+        {
+            return NotFound("Family tree not found.");
+        }
+
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        if (collaborator == null || collaborator.Role != "owner")
+        {
+            return Forbid("Only the tree owner can delete the family tree.");
+        }
+
+        // Delete associated profiles first to prevent orphaned records in MongoDB
+        var profiles = await _context.PersonProfiles
+            .Where(p => p.TreeId == treeId)
+            .ToListAsync();
+        _context.PersonProfiles.RemoveRange(profiles);
+
+        // Delete the tree itself
+        _context.FamilyTrees.Remove(tree);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Family tree deleted successfully." });
     }
 
 

@@ -13,7 +13,12 @@ public class FamilyTree
 
     public List<TreeCollaborator> Collaborators { get; set; } = new();
 
-    public bool IsPublic { get; set; } = false;
+    private bool? _isPublic = false;
+    public bool? IsPublic
+    {
+        get => _isPublic ?? false;
+        set => _isPublic = value;
+    }
 
     public string TreeGraphJsonData { get; set; } = "[]";
 

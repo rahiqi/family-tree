@@ -59,7 +59,7 @@ public class ProfileController : ControllerBase
         var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
         
         // If the tree is private and the user is not a collaborator, deny access
-        if (!tree.IsPublic && collaborator == null)
+        if (tree.IsPublic != true && collaborator == null)
         {
             return Forbid("You do not have access to this family tree.");
         }

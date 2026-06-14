@@ -509,19 +509,17 @@ function Landing() {
         <section style={{ borderTop: '1px solid var(--border-color)', marginTop: '4rem', paddingTop: '4rem', textAlign: 'start' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 className="text-gradient" style={{ fontSize: '2rem', fontWeight: 800 }}>
-              {isRtl ? 'شجره‌نامه‌های عمومی کاربران' : 'Public Family Trees'}
+              {t('public_trees_title')}
             </h2>
             <p style={{ color: 'var(--text-secondary)', marginTop: '0.75rem', fontSize: '1rem' }}>
-              {isRtl 
-                ? 'شجره‌نامه‌هایی که توسط صاحبان آن‌ها به اشتراک گذاشته شده و قابل مشاهده برای عموم هستند.' 
-                : 'Browse family trees shared publicly by the community.'}
+              {t('public_trees_subtitle')}
             </p>
           </div>
 
           {publicTreesLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-secondary)' }}>
               <div className="loading-spinner"></div>
-              <p style={{ marginTop: '1rem' }}>{isRtl ? 'در حال بارگذاری شجره‌نامه‌ها...' : 'Loading public trees...'}</p>
+              <p style={{ marginTop: '1rem' }}>{t('loading_public_trees')}</p>
             </div>
           ) : publicTrees.length === 0 ? (
             <div style={{ 
@@ -533,7 +531,7 @@ function Landing() {
             }}>
               <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '1rem' }}>🌐</span>
               <p style={{ color: 'var(--text-secondary)' }}>
-                {isRtl ? 'هیچ شجره‌نامه عمومی در حال حاضر وجود ندارد.' : 'No public family trees are available right now.'}
+                {t('no_public_trees')}
               </p>
             </div>
           ) : (
@@ -550,17 +548,17 @@ function Landing() {
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                         <div className="tree-card-title" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{tree.name}</div>
-                        <span className="badge badge-visitor" style={{ fontSize: '0.7rem' }}>🌐 {isRtl ? 'عمومی' : 'Public'}</span>
+                        <span className="badge badge-visitor" style={{ fontSize: '0.7rem' }}>🌐 {t('public')}</span>
                       </div>
                       
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                        👤 {isRtl ? 'ایجادکننده:' : 'Owner:'} {tree.ownerName}
+                        👤 {t('owner')}: {tree.ownerName}
                       </div>
 
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         <Calendar size={12} />
                         <span>
-                          {isRtl ? 'آخرین به‌روزرسانی:' : 'Updated:'}{' '}
+                          {t('updated_label')}{' '}
                           {new Date(tree.updatedAt).toLocaleDateString(isRtl ? 'fa-IR' : 'en-US')}
                         </span>
                       </div>
@@ -568,7 +566,7 @@ function Landing() {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
                       <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        {isRtl ? 'مشاهده درخت' : 'View Tree'}
+                        {t('view_tree')}
                         <ChevronRight size={14} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
                       </span>
                     </div>

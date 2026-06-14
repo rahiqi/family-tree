@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://api.treely.ir/api'; // Standard port for ASP.NET Web API
+export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
 // Helper to get token
 const getAuthHeaders = () => {
@@ -65,10 +66,10 @@ export const api = {
     getAll: () => request('/tree'),
     get: (treeId) => request(`/tree/${treeId}`),
     getPublic: () => request('/tree/public'),
-    create: (name) => 
+    create: (name, isPublic) => 
       request('/tree', {
         method: 'POST',
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, isPublic })
       }),
     updateGraph: (treeId, graphData) => 
       request(`/tree/${treeId}`, {
@@ -79,6 +80,10 @@ export const api = {
       request(`/tree/${treeId}/privacy`, {
         method: 'PUT',
         body: JSON.stringify({ isPublic })
+      }),
+    delete: (treeId) =>
+      request(`/tree/${treeId}`, {
+        method: 'DELETE'
       }),
     addCollaborator: (treeId, email, role) => 
       request(`/tree/${treeId}/collaborator`, {

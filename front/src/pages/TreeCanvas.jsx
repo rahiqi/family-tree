@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import * as f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
-import { api } from '../services/api';
+import { api, API_ORIGIN } from '../services/api';
 import DatePicker from '../components/DatePicker';
 
 
@@ -198,7 +198,7 @@ function TreeCanvas() {
             ">
               <div style="display: flex; align-items: center; gap: 0.6rem;">
                 ${avatarUrl ? `
-                  <img src="http://localhost:5263${avatarUrl}" style="
+                  <img src="${API_ORIGIN}${avatarUrl}" style="
                     width: 38px; 
                     height: 38px; 
                     border-radius: 50%; 
@@ -285,9 +285,7 @@ function TreeCanvas() {
           } else {
             // Show a visual warning indicator that it's read-only
             const warningBar = document.createElement('div');
-            warningBar.innerHTML = i18n.language === 'fa' 
-              ? 'شما فقط مجاز به ویرایش عضوهایی هستید که خودتان اضافه کرده‌اید.' 
-              : 'You can only edit nodes that you have added yourself.';
+            warningBar.innerHTML = t('editor_own_nodes_warning');
             warningBar.style.cssText = `
               position: fixed;
               bottom: 2rem;
@@ -316,13 +314,13 @@ function TreeCanvas() {
             { id: 'first name', label: t('first_name'), type: 'text' },
             { id: 'last name', label: t('last_name'), type: 'text' },
             { id: 'gender', label: t('role'), type: 'select', options: [{ value: 'M', label: 'Male' }, { value: 'F', label: 'Female' }] },
-            { id: 'birthday', label: i18n.language === 'fa' ? 'تاریخ تولد' : 'Birthday', type: 'text' }
+            { id: 'birthday', label: t('birthday'), type: 'text' }
 
           ])
           .setEditFirst(true)
           .setLinkExistingRelConfig({
-            title: i18n.language === 'fa' ? 'آیا این شخص قبلاً در شجره‌نامه ثبت شده است؟' : 'Profile already exists?',
-            select_placeholder: i18n.language === 'fa' ? 'انتخاب شخص از درخت...' : 'Select person from tree...',
+            title: t('profile_exists'),
+            select_placeholder: t('select_person'),
             linkRelLabel: (d) => {
               const fName = d.data['first name'] || d.data['firstName'] || '';
               const lName = d.data['last name'] || d.data['lastName'] || '';
@@ -344,7 +342,7 @@ function TreeCanvas() {
 
               // Quick success indicator
               const successToast = document.createElement('div');
-              successToast.innerHTML = i18n.language === 'fa' ? 'تغییرات ذخیره شد' : 'Changes saved';
+              successToast.innerHTML = t('changes_saved');
               successToast.style.cssText = `
                 position: fixed;
                 bottom: 2rem;
@@ -504,19 +502,17 @@ function TreeCanvas() {
         >
           <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>🔒</span>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>
-            {i18n.language === 'fa' ? 'دسترسی محدود شده است' : 'Access Restricted'}
+            {t('private_tree_title')}
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-            {i18n.language === 'fa'
-              ? 'این شجره‌نامه خصوصی است. لطفاً برای مشاهده آن وارد حساب کاربری خود که دسترسی همکاری دارد شوید.'
-              : 'This family tree is private. Please log in with an authorized collaborator account to view it.'}
+            {t('private_tree_message')}
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link to="/auth/login" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
               {t('login')}
             </Link>
             <Link to="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.5rem' }}>
-              {i18n.language === 'fa' ? 'صفحه اصلی' : 'Go Home'}
+              {t('go_home')}
             </Link>
           </div>
         </motion.div>
@@ -566,9 +562,7 @@ function TreeCanvas() {
                 boxShadow: saveLoading ? '0 0 6px #f59e0b' : '0 0 6px #10b981'
               }}></span>
               <span>
-                {saveLoading 
-                  ? (i18n.language === 'fa' ? 'در حال ذخیره‌سازی...' : 'Saving changes...') 
-                  : (i18n.language === 'fa' ? 'همه تغییرات ذخیره شد' : 'All changes saved')}
+                {saveLoading ? t('saving_changes') : t('all_changes_saved')}
               </span>
             </div>
           )}
@@ -616,7 +610,7 @@ function TreeCanvas() {
         ) : loading ? (
           <div className="canvas-pane flex-center" style={{ flexDirection: 'column', gap: '1rem', flexGrow: 1, height: '100%' }}>
             <div className="loading-spinner"></div>
-            <span style={{ color: 'var(--text-secondary)' }}>{i18n.language === 'fa' ? 'در حال بارگذاری شجره‌نامه...' : 'Loading canvas...'}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{t('loading_canvas')}</span>
           </div>
         ) : (
           /* Empty Tree Onboarding Screen */
@@ -629,11 +623,9 @@ function TreeCanvas() {
             >
               <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '0.5rem' }}>🌳</span>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{i18n.language === 'fa' ? 'افزودن اولین عضو خاندان' : 'Create First Member'}</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{t('create_first_member')}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                  {i18n.language === 'fa' 
-                    ? 'درخت خانوادگی شما در حال حاضر خالی است. لطفاً اطلاعات اولین شخص (خودتان یا بزرگ خاندان) را وارد کنید.'
-                    : 'Your family tree is empty. Start by adding the first member (yourself, a parent, or ancestor).'}
+                  {t('empty_tree_onboarding_desc')}
                 </p>
               </div>
 
@@ -669,16 +661,16 @@ function TreeCanvas() {
                       value={firstPerson.gender}
                       onChange={(e) => setFirstPerson({...firstPerson, gender: e.target.value})}
                     >
-                      <option value="M">{i18n.language === 'fa' ? 'مرد' : 'Male'}</option>
-                      <option value="F">{i18n.language === 'fa' ? 'زن' : 'Female'}</option>
+                      <option value="M">{t('male')}</option>
+                      <option value="F">{t('female')}</option>
                     </select>
                   </div>
                   <div className="form-group">
                     <DatePicker
                       value={firstPerson.birthday}
                       onChange={(val) => setFirstPerson({...firstPerson, birthday: val})}
-                      label={i18n.language === 'fa' ? 'تاریخ تولد' : 'Birthday'}
-                      placeholder={i18n.language === 'fa' ? 'مثال: ۱۳۷۰/۰۱/۰۱' : 'e.g. 1991-03-21'}
+                      label={t('birthday')}
+                      placeholder={t('birthday_placeholder')}
                     />
                   </div>
 
@@ -703,14 +695,8 @@ function TreeCanvas() {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0 0.5rem', flexWrap: 'wrap' }}>
               <Info size={14} />
               <span>
-                {i18n.language === 'fa' 
-                  ? 'درگ برای جابجایی | اسکرول برای زوم' 
-                  : 'Drag to pan | Scroll to zoom'}
-                {(userRole === 'owner' || userRole === 'editor') && (
-                  i18n.language === 'fa' 
-                    ? ' | روی کارت کلیک کنید تا پنل ویرایش و دکمه (+) افزودن بستگان باز شود.' 
-                    : ' | Click any card to edit details or add relatives (+).'
-                )}
+                {t('canvas_toolbar_instructions')}
+                {(userRole === 'owner' || userRole === 'editor') && t('canvas_toolbar_instructions_edit')}
               </span>
             </span>
           </div>
@@ -800,7 +786,7 @@ function TreeCanvas() {
 
               {/* Active Collaborators list */}
               <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                {i18n.language === 'fa' ? 'همکاران با دسترسی فعال' : 'Active Collaborations'}
+                {t('active_collaborations')}
               </h4>
 
               <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

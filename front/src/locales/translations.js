@@ -121,7 +121,18 @@ export const resources = {
       "filter_deaths": "وفات‌ها 🕊️",
       "filter_others": "سایر رویدادها ✏️",
       "no_events_found": "هیچ رویدادی متناسب با فیلتر انتخابی یافت نشد.",
-      "back_to_tree": "بازگشت به شجره‌نامه"
+      "back_to_tree": "بازگشت به شجره‌نامه",
+      "pricing_title": "طرح‌های قیمت‌گذاری",
+      "pricing_subtitle": "بهترین طرح را برای ثبت تاریخچه فامیل خود انتخاب کنید.",
+      "plan_free": "رایگان",
+      "plan_wealthy": "ثروتمند",
+      "pricing_for_now": "فعلاً",
+      "feature_interactive_canvas": "شجره‌نامه تعاملی",
+      "feature_timeline": "رویدادهای تایم‌لاین",
+      "feature_unlimited_photos": "عکس و آواتار نامحدود",
+      "feature_rbac": "همکاری تیمی (دسترسی‌ها)",
+      "feature_public_sharing": "اشتراک‌گذاری عمومی",
+      "feature_included": "شامل می‌شود"
     }
   },
   en: {
@@ -246,7 +257,18 @@ export const resources = {
       "filter_deaths": "Memorials 🕊️",
       "filter_others": "Others ✏️",
       "no_events_found": "No events found matching the selected filters.",
-      "back_to_tree": "Back to Tree"
+      "back_to_tree": "Back to Tree",
+      "pricing_title": "Pricing Plans",
+      "pricing_subtitle": "Choose the perfect plan for your family's legacy.",
+      "plan_free": "Free",
+      "plan_wealthy": "Wealthy",
+      "pricing_for_now": "for now",
+      "feature_interactive_canvas": "Interactive Family Canvas",
+      "feature_timeline": "Timeline Events",
+      "feature_unlimited_photos": "Unlimited Photos & Avatars",
+      "feature_rbac": "Team Collaboration (RBAC)",
+      "feature_public_sharing": "Public Sharing",
+      "feature_included": "Included"
     }
   }
 };

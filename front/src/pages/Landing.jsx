@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Users, Eye, Globe, ChevronRight, ArrowRight, GitMerge, Shield, Compass, Calendar } from 'lucide-react';
+import { Share2, Users, Eye, Globe, ChevronRight, ArrowRight, GitMerge, Shield, Compass, Calendar, Check } from 'lucide-react';
 import { api } from '../services/api';
 
 function Landing() {
@@ -482,6 +482,73 @@ function Landing() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Pricing Plans Section */}
+        <section style={{ borderTop: '1px solid var(--border-color)', marginTop: '4rem', paddingTop: '4rem', textAlign: 'center' }}>
+          <div style={{ marginBottom: '3rem' }}>
+            <h2 className="text-gradient" style={{ fontSize: '2.25rem', fontWeight: 800 }}>
+              {t('pricing_title')}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '0.75rem', fontSize: '1rem' }}>
+              {t('pricing_subtitle')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto" style={{ maxWidth: '900px', margin: '0 auto' }}>
+            {/* Free Plan */}
+            <motion.div 
+              className="glass-card pricing-card"
+              style={{ padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border-color)', position: 'relative' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{t('plan_free')}</h3>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '2rem' }}>$0 <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)' }}>/ forever</span></div>
+              
+              <ul style={{ textAlign: 'start', display: 'flex', flexDirection: 'column', gap: '1rem', margin: 0, padding: 0, listStyle: 'none' }}>
+                {['feature_interactive_canvas', 'feature_timeline', 'feature_unlimited_photos', 'feature_rbac', 'feature_public_sharing'].map((feature) => (
+                  <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                    <span style={{ fontSize: '0.95rem' }}>{t(feature)}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Wealthy Plan */}
+            <motion.div 
+              className="glass-card pricing-card"
+              style={{ padding: '2.5rem', borderRadius: '24px', border: '2px solid rgba(99, 102, 241, 0.5)', background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%)', position: 'relative' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: 'white', padding: '0.25rem 1rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)' }}>
+                RECOMMENDED
+              </div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{t('plan_wealthy')}</h3>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                $0 <span style={{ fontSize: '1rem', fontWeight: 800, color: '#818cf8' }}>{t('pricing_for_now')}</span>
+              </div>
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', marginBottom: '2rem' }}>All premium features included</p>
+              
+              <ul style={{ textAlign: 'start', display: 'flex', flexDirection: 'column', gap: '1rem', margin: 0, padding: 0, listStyle: 'none' }}>
+                {['feature_interactive_canvas', 'feature_timeline', 'feature_unlimited_photos', 'feature_rbac', 'feature_public_sharing'].map((feature) => (
+                  <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 10px rgba(99,102,241,0.4)' }}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                    <span style={{ fontSize: '0.95rem' }}>{t(feature)}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
         </section>
 

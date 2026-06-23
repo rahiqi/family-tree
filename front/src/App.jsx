@@ -53,12 +53,14 @@ function App() {
           </Link>
           
           <div className="navbar-actions">
+            {/* 
             <button 
               className="lang-switch"
               onClick={() => i18n.changeLanguage(i18n.language === 'fa' ? 'en' : 'fa')}
             >
               {i18n.language === 'fa' ? 'English' : 'فارسی'}
             </button>
+            */}
 
             <button 
               className="lang-switch"

@@ -145,21 +145,14 @@ function Dashboard() {
         </motion.div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginTop: '1.5rem' }}>
+      <div className="grid grid-cols-1 gap-8 mt-6">
         {error && (
-          <div style={{ 
-            backgroundColor: '#fee2e2', 
-            color: '#dc2626', 
-            padding: '1rem', 
-            borderRadius: 'var(--radius-md)', 
-            border: '1px solid #fca5a5',
-            fontSize: '0.95rem'
-          }}>
+          <div className="bg-red-500/10 text-red-500 p-4 rounded-xl border border-red-500/20 text-sm">
             {error}
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem' }} className="dashboard-layout-responsive">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
           {/* Trees Section */}
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -184,7 +177,7 @@ function Dashboard() {
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{t('no_trees')}</p>
               </div>
             ) : (
-              <div className="tree-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-16">
                 {trees.map((tree, idx) => {
                   const userCollab = tree.collaborators?.find(c => c.userId && currentUserId && c.userId.toLowerCase() === currentUserId.toLowerCase()) || 
                                      tree.collaborators?.find(c => c.email && currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase());
@@ -193,16 +186,21 @@ function Dashboard() {
                   
                   return (
                     <motion.div
-                      key={tree.id}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
+                       key={tree.id}
+                       initial={{ opacity: 0, y: 15 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ delay: idx * 0.05 }}
                     >
                       <Link to={`/tree/${tree.id}`} className="tree-card">
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                            <div className="tree-card-title">{tree.name}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <div style={{ marginBottom: '1.25rem' }}>
+                            <div className="tree-card-title" style={{ fontSize: '1.25rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {tree.name}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                              <span className={`badge ${getRoleClass(userRole)}`} style={{ margin: 0 }}>
+                                {getRoleLabel(userRole)}
+                              </span>
                               {userRole === 'owner' ? (
                                 <>
                                   <button
@@ -263,11 +261,7 @@ function Dashboard() {
                                   <span>{isPublic ? t('public') : t('private')}</span>
                                 </span>
                               )}
-                              <span className={`badge ${getRoleClass(userRole)}`}>
-                                {getRoleLabel(userRole)}
-                              </span>
                             </div>
-
                           </div>
                           
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -391,15 +385,6 @@ function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Embedded style query for CSS layout changes */}
-      <style>{`
-        @media (max-width: 768px) {
-          .dashboard-layout-responsive {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

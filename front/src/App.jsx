@@ -8,6 +8,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import TreeCanvas from './pages/TreeCanvas';
 import ProfileView from './pages/ProfileView';
+import TreeCalendar from './pages/TreeCalendar';
+import TelegramEmailPrompt from './pages/TelegramEmailPrompt';
 import { CuteFamilyTreeLogo } from './components/CuteFamilyTreeLogo';
 
 function App() {
@@ -45,8 +47,8 @@ function App() {
     <Router>
       <div className="app-root">
         <nav className="navbar">
-          <Link to={isLoggedIn ? "/dashboard" : "/"} className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CuteFamilyTreeLogo style={{ width: '42px', height: '42px' }} />
+          <Link to={isLoggedIn ? "/dashboard" : "/"} className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <CuteFamilyTreeLogo style={{ width: '42px', height: '42px' }} onlyIcon={true} />
             <span>{t('app_name')}</span>
           </Link>
           
@@ -92,9 +94,11 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/auth/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
           <Route path="/auth/register" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />} />
+          <Route path="/auth/telegram-email" element={isLoggedIn ? <Navigate to="/dashboard" /> : <TelegramEmailPrompt />} />
           <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/auth/login" />} />
           <Route path="/tree/:treeId" element={<TreeCanvas />} />
           <Route path="/tree/:treeId/profile/:id" element={<ProfileView />} />
+          <Route path="/tree/:treeId/calendar" element={<TreeCalendar />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

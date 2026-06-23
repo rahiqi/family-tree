@@ -24,6 +24,9 @@ services:
       - DatabaseName=treely
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5263
+      - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Authentication__Telegram__BotToken=${TELEGRAM_BOT_TOKEN}
+      - Authentication__Telegram__BotUsername=${TELEGRAM_BOT_USERNAME}
     networks:
       default:
       traefik_default:  

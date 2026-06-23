@@ -66,7 +66,7 @@ function ProfileView() {
       // 1. Fetch Tree metadata to extract node details
       const treeRes = await api.tree.get(treeId);
       setTreeInfo(treeRes);
-      setUserRole(treeRes.userRole || 'visitor');
+      setUserRole(treeRes.userRole || treeRes.UserRole || 'visitor');
       
       const treeNodes = JSON.parse(treeRes.treeGraphJsonData || '[]');
       const matchedNode = treeNodes.find(n => n.id === id);
@@ -389,7 +389,7 @@ function ProfileView() {
       )}
 
       {/* Main Content Layout Columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 2fr)', gap: '3.5rem', alignItems: 'start' }} className="dashboard-layout-responsive">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_2fr] gap-12 items-start">
         
         {/* Left Column: Identity Summary + Biography */}
         <div className="timeline-sticky-bar">
@@ -631,16 +631,21 @@ function ProfileView() {
                     
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                       {/* Scrolling Stick Date Line Indicator */}
-                      <div className="timeline-date-badge">
+                      <div className="timeline-date-badge hidden md:block">
                         {ev.date}
                       </div>
 
                       {/* Content details Card */}
                       <div className="timeline-content-card" style={{ flexGrow: 1, minWidth: '220px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-                          <h3 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700 }}>
-                            {ev.title}
-                          </h3>
+                          <div>
+                            <span className="inline-block md:hidden text-xs font-bold text-[#818cf8] bg-[#6366f1]/15 border border-[#6366f1]/30 px-2 py-0.5 rounded-full mb-2">
+                              {ev.date}
+                            </span>
+                            <h3 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700 }}>
+                              {ev.title}
+                            </h3>
+                          </div>
                           
                           {canEdit && (
                             <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>

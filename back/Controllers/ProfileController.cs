@@ -216,4 +216,89 @@ public class ProfileController : ControllerBase
 
         return Ok(new { url = fileUrl });
     }
+
+    [AllowAnonymous]
+    [HttpGet("calendar")]
+    public async Task<IActionResult> GetTreeCalendar(Guid treeId)
+    {
+        var tree = await _context.FamilyTrees.FindAsync(treeId);
+        if (tree == null)
+        {
+            return NotFound("Family tree not found.");
+        }
+
+        var userId = GetCurrentUserId();
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        
+        // If the tree is private and the user is not a collaborator, deny access
+        if (tree.IsPublic != true && collaborator == null)
+        {
+            return Forbid("You do not have access to this family tree.");
+        }
+
+        // Parse tree graph data to map person IDs to names, genders, and avatars
+        var personMap = new Dictionary<string, (string FullName, string? Avatar, string Gender)>();
+        try
+        {
+            var graph = JsonNode.Parse(tree.TreeGraphJsonData ?? "[]")?.AsArray();
+            if (graph != null)
+            {
+                foreach (var node in graph)
+                {
+                    if (node == null) continue;
+                    var id = node["id"]?.ToString();
+                    if (string.IsNullOrEmpty(id)) continue;
+
+                    var dataNode = node["data"];
+                    var fName = dataNode?["first name"]?.ToString() ?? dataNode?["firstName"]?.ToString() ?? string.Empty;
+                    var lName = dataNode?["last name"]?.ToString() ?? dataNode?["lastName"]?.ToString() ?? string.Empty;
+                    var fullName = $"{fName} {lName}".Trim();
+                    if (string.IsNullOrEmpty(fullName)) fullName = "Unnamed Person";
+
+                    var avatar = dataNode?["avatar"]?.ToString();
+                    var gender = dataNode?["gender"]?.ToString() ?? "M";
+
+                    personMap[id] = (fullName, avatar, gender);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log and continue
+            Console.WriteLine($"Error parsing tree graph in GetTreeCalendar: {ex.Message}");
+        }
+
+        // Fetch all profiles for this tree
+        var profiles = await _context.PersonProfiles
+            .Where(p => p.TreeId == treeId)
+            .ToListAsync();
+
+        var events = new List<object>();
+
+        foreach (var profile in profiles)
+        {
+            personMap.TryGetValue(profile.Id, out var personInfo);
+            var fullName = personInfo.FullName ?? "Unnamed Person";
+            var avatar = personInfo.Avatar ?? profile.AvatarUrl;
+            var gender = personInfo.Gender ?? "M";
+
+            foreach (var ev in profile.TimelineEvents)
+            {
+                events.Add(new
+                {
+                    ev.Id,
+                    ev.Date,
+                    ev.Title,
+                    ev.Description,
+                    ev.Type,
+                    PersonId = profile.Id,
+                    PersonName = fullName,
+                    PersonAvatar = avatar,
+                    PersonGender = gender
+                });
+            }
+        }
+
+        return Ok(events);
+    }
 }

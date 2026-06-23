@@ -78,7 +78,7 @@ function TreeCanvas() {
       setLoading(true);
       const res = await api.tree.get(treeId);
       setTreeInfo(res);
-      setUserRole(res.userRole || 'visitor');
+      setUserRole(res.userRole || res.UserRole || 'visitor');
       setCollaborators(res.collaborators || []);
       
       const parsedData = JSON.parse(res.treeGraphJsonData || '[]');
@@ -277,8 +277,8 @@ function TreeCanvas() {
         // Open edit box if authorized
         if (f3Chart.editTreeInstance && !f3Chart.editTreeInstance.no_edit) {
           const isOwner = userRole === 'owner';
-          // Check node ownership: editors can only edit nodes they added themselves
-          const isOwnNode = d.data.addedBy === currentUser.id;
+          const currentId = currentUser.id || currentUser.Id;
+          const isOwnNode = d.data.addedBy && currentId && d.data.addedBy.toLowerCase() === currentId.toLowerCase();
 
           if (isOwner || isOwnNode) {
             f3Chart.editTreeInstance.open(d.data);
@@ -329,15 +329,22 @@ function TreeCanvas() {
           })
           .setOnChange(async () => {
             const updated = f3EditTree.exportData();
-            setTempGraphData(updated);
+            const currentId = currentUser.id || currentUser.Id;
+            const updatedWithAddedBy = updated.map(node => {
+              if (!node.addedBy) {
+                node.addedBy = currentId;
+              }
+              return node;
+            });
+            setTempGraphData(updatedWithAddedBy);
             setHasUnsavedChanges(true);
 
             // Auto-save changes directly to the database in real-time
             try {
               setSaveLoading(true);
               setError('');
-              await api.tree.updateGraph(treeId, updated);
-              setTreeData(updated);
+              await api.tree.updateGraph(treeId, updatedWithAddedBy);
+              setTreeData(updatedWithAddedBy);
               setHasUnsavedChanges(false);
 
               // Quick success indicator
@@ -429,6 +436,7 @@ function TreeCanvas() {
     const initialId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
     const initialNode = [{
       id: initialId,
+      addedBy: currentUser.id || currentUser.Id,
       data: {
         'first name': firstPerson.firstName,
         'last name': firstPerson.lastName,
@@ -524,8 +532,8 @@ function TreeCanvas() {
 
     <div className="tree-container" style={{ flexDirection: 'column' }}>
       {/* Top Bar / Header */}
-      <div className="canvas-header-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-16 lg:px-24 xl:px-32 md:py-3 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] z-20 shrink-0">
+        <div className="flex items-center justify-between md:justify-start gap-3 flex-wrap w-full md:w-auto">
           <Link to="/dashboard" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <ArrowLeft size={16} style={{ transform: i18n.language === 'fa' ? 'rotate(180deg)' : 'none' }} />
             <span>{t('back_to_dashboard')}</span>
@@ -539,7 +547,7 @@ function TreeCanvas() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="flex justify-between md:justify-end gap-4 items-center flex-wrap w-full md:w-auto">
           {/* Real-time Sync Status Indicator */}
           {(userRole === 'owner' || userRole === 'editor') && (
             <div style={{ 
@@ -566,6 +574,15 @@ function TreeCanvas() {
               </span>
             </div>
           )}
+
+          <Link
+            to={`/tree/${treeId}/calendar`}
+            className="btn btn-secondary"
+            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none' }}
+          >
+            <span>📅</span>
+            <span>{t('calendar')}</span>
+          </Link>
 
           {userRole === 'owner' && (
             <button 
@@ -691,7 +708,7 @@ function TreeCanvas() {
 
         {/* Floating Canvas Zoom and navigation instructions */}
         {treeData.length > 0 && (
-          <div className="canvas-toolbar" style={{ bottom: '1.5rem', insetInlineStart: '1.5rem' }}>
+          <div className="canvas-toolbar hidden md:flex" style={{ bottom: '1.5rem', insetInlineStart: '1.5rem' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0 0.5rem', flexWrap: 'wrap' }}>
               <Info size={14} />
               <span>

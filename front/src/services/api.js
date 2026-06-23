@@ -63,6 +63,17 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ email, password, firstName, lastName })
       }),
+    getConfig: () => request('/auth/config'),
+    loginWithGoogle: (idToken, isMock = false, mockData = {}) => 
+      request('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ idToken, isMock, ...mockData })
+      }),
+    loginWithTelegram: (payload) => 
+      request('/auth/telegram', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }),
   },
   tree: {
     getAll: () => request('/tree'),
@@ -100,6 +111,7 @@ export const api = {
   },
   profile: {
     get: (treeId, personId) => request(`/tree/${treeId}/profile/${personId}`),
+    getCalendar: (treeId) => request(`/tree/${treeId}/profile/calendar`),
     update: (treeId, personId, data) => 
       request(`/tree/${treeId}/profile/${personId}`, {
         method: 'POST',

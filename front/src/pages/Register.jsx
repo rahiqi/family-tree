@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 
+import { SocialAuthButtons } from '../components/SocialAuthButtons';
+
 function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -203,6 +205,8 @@ function Register() {
             {loading ? '...' : t('register')}
           </button>
         </form>
+
+        <SocialAuthButtons />
 
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem' }}>
           <Link to="/auth/login" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: '500' }}>

@@ -137,17 +137,18 @@ public class TreeController : ControllerBase
     [HttpGet("public")]
     public async Task<IActionResult> GetPublicTrees()
     {
-        var trees = await _context.FamilyTrees
+        var dbTrees = await _context.FamilyTrees
             .Where(t => t.IsPublic == true)
             .OrderByDescending(t => t.UpdatedAt)
-            .Select(t => new
-            {
-                t.Id,
-                t.Name,
-                t.UpdatedAt,
-                OwnerName = t.Collaborators.Where(c => c.Role == "owner").Select(c => c.Email).FirstOrDefault() ?? "Unknown"
-            })
             .ToListAsync();
+
+        var trees = dbTrees.Select(t => new
+        {
+            t.Id,
+            t.Name,
+            t.UpdatedAt,
+            OwnerName = t.Collaborators.FirstOrDefault(c => c.Role == "owner")?.Email ?? "Unknown"
+        }).ToList();
 
         return Ok(trees);
     }

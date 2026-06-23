@@ -113,23 +113,6 @@ function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '0.5rem', 
-              background: 'var(--bg-secondary)', 
-              border: '1px solid var(--border-color)',
-              padding: '0.5rem 1.25rem',
-              borderRadius: '99px',
-              color: 'var(--accent)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              marginBottom: '2rem',
-              boxShadow: 'var(--shadow-sm)'
-            }}>
-              <span>✨</span>
-              <span>{isRtl ? 'نسخه دوم پلتفرم مدیریت شجره‌نامه تریلی' : 'Treely V2 Family Tree SaaS is live'}</span>
-            </div>
 
             <h1 className="hero-title text-gradient" style={{ fontSize: '3.5rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
               {t('slogan')}
@@ -259,10 +242,7 @@ function Landing() {
                       width="160" 
                       height="50" 
                       rx="10" 
-                      fill={isHovered ? 'var(--bg-secondary)' : bg} 
-                      stroke={accent} 
-                      strokeWidth={isHovered ? '2.5' : '1.5'} 
-                      style={{ transition: 'all 0.3s ease' }}
+                      className={`demo-node-rect ${isMale ? 'male' : 'female'} ${isHovered ? 'hovered' : ''}`}
                     />
                     <text 
                       x="0" 
@@ -302,7 +282,7 @@ function Landing() {
             </p>
           </div>
 
-          <div className="features-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-16">
             <motion.div 
               className="feature-card"
               initial={{ opacity: 0, y: 20 }}
@@ -435,7 +415,7 @@ function Landing() {
 
         {/* Onboarding Timeline teaser */}
         <section style={{ borderTop: '1px solid var(--border-color)', marginTop: '4rem', paddingTop: '4rem', textAlign: 'start' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center' }} className="dashboard-layout-responsive">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-gradient" style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1.25 }}>
                 {isRtl ? 'مجموعه ارزشمندی از تاریخچه فامیل شما' : 'Preserve a Rich Timeline of Your Legacy'}
@@ -475,7 +455,7 @@ function Landing() {
                 <div className="timeline-line" style={{ insetInlineStart: '12px' }}></div>
                 
                 <div style={{ position: 'relative', paddingInlineStart: '2.5rem', marginBottom: '2rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#10b981', border: '2px solid white' }}></div>
+                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#10b981', border: '2px solid var(--bg-secondary)' }}></div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۲۰/۰۲/۱۵' : '1941/05/05'}
                   </span>
@@ -484,7 +464,7 @@ function Landing() {
                 </div>
 
                 <div style={{ position: 'relative', paddingInlineStart: '2.5rem', marginBottom: '2rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#6366f1', border: '2px solid white' }}></div>
+                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#6366f1', border: '2px solid var(--bg-secondary)' }}></div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۴۵/۰۶/۱۰' : '1966/09/01'}
                   </span>
@@ -493,7 +473,7 @@ function Landing() {
                 </div>
 
                 <div style={{ position: 'relative', paddingInlineStart: '2.5rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#ef4444', border: '2px solid white' }}></div>
+                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#ef4444', border: '2px solid var(--bg-secondary)' }}></div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۷۷/۱۰/۱۲' : '1998/12/30'}
                   </span>
@@ -535,7 +515,7 @@ function Landing() {
               </p>
             </div>
           ) : (
-            <div className="tree-grid animate-fade-in" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', display: 'grid', gap: '1.5rem' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
               {publicTrees.map((tree, idx) => (
                 <motion.div
                   key={tree.id}

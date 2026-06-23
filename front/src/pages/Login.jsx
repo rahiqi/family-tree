@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 
+import { SocialAuthButtons } from '../components/SocialAuthButtons';
+
 function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -143,6 +145,8 @@ function Login() {
             {loading ? '...' : t('login')}
           </button>
         </form>
+
+        <SocialAuthButtons />
 
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem' }}>
           <Link to="/auth/register" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: '500' }}>

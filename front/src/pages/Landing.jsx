@@ -364,27 +364,27 @@ function Landing() {
               <div className="timeline-track">
                 <div className="timeline-line" style={{ insetInlineStart: '12px', background: 'linear-gradient(to bottom, #DE7B54, #F0A786, #DE7B54)' }}></div>
                 
-                <div className="relative pl-10 mb-8 rtl:pr-10 rtl:pl-0">
-                  <div className="absolute inset-inline-start-[4px] top-[4px] w-[15px] height-[15px] rounded-full bg-emerald-500 border-2 border-brand-light dark:border-brand-dark z-10" style={{ height: '15px' }}></div>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                <div className="relative ps-10 mb-8">
+                  <div className="absolute start-[6px] top-[4px] w-[15px] h-[15px] rounded-full bg-emerald-500 border-2 border-brand-light dark:border-brand-dark z-10"></div>
+                  <span className="inline-block text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
                     {isRtl ? '۱۳۲۰/۰۲/۱۵' : '1941/05/05'}
                   </span>
                   <h4 className="text-brand-dark dark:text-white font-bold text-base mt-2">{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
                 </div>
 
-                <div className="relative pl-10 mb-8 rtl:pr-10 rtl:pl-0">
-                  <div className="absolute inset-inline-start-[4px] top-[4px] w-[15px] height-[15px] rounded-full bg-brand-primary border-2 border-brand-light dark:border-brand-dark z-10" style={{ height: '15px' }}></div>
-                  <span className="text-xs font-bold text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 rounded-full">
+                <div className="relative ps-10 mb-8">
+                  <div className="absolute start-[6px] top-[4px] w-[15px] h-[15px] rounded-full bg-brand-primary border-2 border-brand-light dark:border-brand-dark z-10"></div>
+                  <span className="inline-block text-xs font-bold text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 rounded-full">
                     {isRtl ? '۱۳۴۵/۰۶/۱۰' : '1966/09/01'}
                   </span>
                   <h4 className="text-brand-dark dark:text-white font-bold text-base mt-2">{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
                 </div>
 
-                <div className="relative pl-10 rtl:pr-10 rtl:pl-0">
-                  <div className="absolute inset-inline-start-[4px] top-[4px] w-[15px] height-[15px] rounded-full bg-rose-500 border-2 border-brand-light dark:border-brand-dark z-10" style={{ height: '15px' }}></div>
-                  <span className="text-xs font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full">
+                <div className="relative ps-10">
+                  <div className="absolute start-[6px] top-[4px] w-[15px] h-[15px] rounded-full bg-rose-500 border-2 border-brand-light dark:border-brand-dark z-10"></div>
+                  <span className="inline-block text-xs font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full">
                     {isRtl ? '۱۳۷۷/۱۰/۱۲' : '1998/12/30'}
                   </span>
                   <h4 className="text-brand-dark dark:text-white font-bold text-base mt-2">{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>

@@ -1,17 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Share2, Users, Eye, Globe, ChevronRight, ArrowRight, GitMerge, Shield, Compass, Calendar, Check } from 'lucide-react';
 import { api } from '../services/api';
 
 function Landing() {
   const { t, i18n } = useTranslation();
-  const [hoveredNode, setHoveredNode] = useState(null);
   const [publicTrees, setPublicTrees] = useState([]);
   const [publicTreesLoading, setPublicTreesLoading] = useState(true);
 
   const isRtl = i18n.language === 'fa';
+
+  // 3D Parallax Mouse Tracking
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 150 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
+
+  const rotateX = useTransform(smoothMouseY, [-0.5, 0.5], [12, -12]);
+  const rotateY = useTransform(smoothMouseX, [-0.5, 0.5], [-12, 12]);
+
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    const x = (clientX / innerWidth) - 0.5;
+    const y = (clientY / innerHeight) - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   useEffect(() => {
     fetchPublicTrees();
@@ -29,245 +53,84 @@ function Landing() {
     }
   };
 
-  // Demo interactive tree nodes
-  const demoNodes = [
-    { 
-      id: 'gp', 
-      name: isRtl ? 'آرش (پدربزرگ)' : 'Arash (Grandparent)', 
-      date: isRtl ? '۱۳۲۰ - ۱۳۷۷' : '1941 - 1998', 
-      x: 400, 
-      y: 60, 
-      gender: 'M',
-      info: isRtl ? 'بنیان‌گذار شجره‌نامه، متولد شیراز' : 'Family founder, born in Shiraz'
-    },
-    { 
-      id: 'f', 
-      name: isRtl ? 'بابک (پدر)' : 'Babak (Father)', 
-      date: isRtl ? '۱۳۳۴ - اکنون' : '1955 - Present', 
-      x: 250, 
-      y: 160, 
-      gender: 'M',
-      info: isRtl ? 'مهندس معمار، علاقه‌مند به خطاطی' : 'Architect, passion for calligraphy'
-    },
-    { 
-      id: 'm', 
-      name: isRtl ? 'سارا (مادر)' : 'Sarah (Mother)', 
-      date: isRtl ? '۱۳۳۹ - اکنون' : '1960 - Present', 
-      x: 550, 
-      y: 160, 
-      gender: 'F',
-      info: isRtl ? 'پزشک اطفال، نویسنده کتاب کودک' : 'Pediatrician, children books author'
-    },
-    { 
-      id: 'c1', 
-      name: isRtl ? 'دارا (فرزند)' : 'Dara (Child 1)', 
-      date: isRtl ? '۱۳۶۷ - اکنون' : '1988 - Present', 
-      x: 250, 
-      y: 280, 
-      gender: 'M',
-      info: isRtl ? 'عکاس طبیعت، ساکن تورنتو' : 'Nature photographer, lives in Toronto'
-    },
-    { 
-      id: 'c2', 
-      name: isRtl ? 'سیمین (فرزند)' : 'Simin (Child 2)', 
-      date: isRtl ? '۱۳۷۱ - اکنون' : '1992 - Present', 
-      x: 550, 
-      y: 280, 
-      gender: 'F',
-      info: isRtl ? 'مترجم زبان، علاقه‌مند به نوازندگی' : 'Translator, amateur musician'
-    }
-  ];
-
-  return (
-    <div className="mesh-bg" style={{ minHeight: 'calc(100vh - 73px)', position: 'relative', overflow: 'hidden' }}>
-      <div className="dark-grid"></div>
-
-      {/* Decorative ambient light pools */}
-      <div style={{
-        position: 'absolute',
-        top: '10%',
-        left: '20%',
-        width: '400px',
-        height: '400px',
-        background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%)',
-        pointerEvents: 'none',
-        zIndex: 0
-      }}></div>
-      <div style={{
-        position: 'absolute',
-        bottom: '20%',
-        right: '15%',
-        width: '500px',
-        height: '500px',
-        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0) 70%)',
-        pointerEvents: 'none',
-        zIndex: 0
-      }}></div>
-
-      <div className="layout-container" style={{ position: 'relative', zIndex: 2, paddingTop: '4rem', paddingBottom: '6rem' }}>
-        
-        {/* Hero Banner Header */}
-        <section className="hero-section" style={{ padding: '2rem 0 4rem', zIndex: 2 }}>
+          {/* 3D Abstract Floating Network */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-
-            <h1 className="hero-title text-gradient" style={{ fontSize: '3.5rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
-              {t('slogan')}
-            </h1>
-            
-            <p className="hero-subtitle" style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginTop: '1.5rem', marginBottom: '2.5rem', maxWidth: '640px', lineHeight: 1.6 }}>
-              {t('landing_tagline')}
-            </p>
-
-            <div className="flex-center gap-1" style={{ flexWrap: 'wrap' }}>
-              <Link to="/auth/register" className="btn btn-primary" style={{ padding: '0.9rem 2.25rem', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', boxShadow: '0 0 20px rgba(99, 102, 241, 0.35)' }}>
-                <span>{t('get_started')}</span>
-                <ArrowRight size={18} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
-              </Link>
-              <Link to="/auth/login" className="btn btn-secondary" style={{ padding: '0.9rem 2.25rem', fontSize: '1rem' }}>
-                <span>{t('login')}</span>
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Interactive Floating Preview Tree */}
-          <motion.div
-            className="hero-tree-preview glass-card"
+            className="perspective-container"
             style={{ 
               width: '100%', 
-              maxWidth: '900px', 
+              maxWidth: '900px',
               height: '420px', 
               marginTop: '4rem',
-              borderRadius: '24px',
               position: 'relative',
-              overflow: 'hidden'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10
             }}
-            initial={{ opacity: 0, scale: 0.96 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
+            transition={{ delay: 0.3, duration: 1 }}
           >
-            <div style={{ position: 'absolute', top: '1.25rem', insetInlineStart: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
-              <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></span>
-              <span>{isRtl ? 'پیش‌نمایش تعاملی زنده شجره‌نامه' : 'Live Interactive Demo Canvas'}</span>
-            </div>
+            <motion.div 
+              className="preserve-3d"
+              style={{
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                rotateX,
+                rotateY
+              }}
+            >
+              {/* SVG Glowing Lines Connecting them */}
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', transform: 'translateZ(0px)' }}>
+                <defs>
+                  <linearGradient id="glow-line-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#34d399" stopOpacity="0.2" />
+                  </linearGradient>
+                  <linearGradient id="glow-line-2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#f472b6" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity="0.2" />
+                  </linearGradient>
+                  <linearGradient id="glow-line-3" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity="0.2" />
+                  </linearGradient>
+                </defs>
+                <path d="M 50 50 L 30 20" stroke="url(#glow-line-1)" strokeWidth="0.4" strokeDasharray="1,1" className="float-slow" />
+                <path d="M 50 50 L 75 25" stroke="url(#glow-line-2)" strokeWidth="0.6" className="float-medium" />
+                <path d="M 50 50 L 25 80" stroke="url(#glow-line-3)" strokeWidth="0.4" className="float-fast" />
+                <path d="M 50 50 L 65 85" stroke="rgba(250, 204, 21, 0.4)" strokeWidth="0.3" strokeDasharray="2,1" className="float-delayed" />
+              </svg>
 
-            {/* Active Hover Node Context Drawer */}
-            <AnimatePresence>
-              {hoveredNode && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  style={{
-                    position: 'absolute',
-                    bottom: '1.5rem',
-                    insetInlineStart: '1.5rem',
-                    background: 'var(--bg-secondary)',
-                    border: `1.5px solid ${hoveredNode.gender === 'M' ? '#38bdf8' : '#f472b6'}99`,
-                    borderRadius: 'var(--radius-md)',
-                    padding: '1rem 1.25rem',
-                    width: '260px',
-                    zIndex: 20,
-                    boxShadow: 'var(--shadow-lg)',
-                    textAlign: 'start'
-                  }}
-                >
-                  <div style={{ fontSize: '0.7rem', color: hoveredNode.gender === 'M' ? '#38bdf8' : '#f472b6', fontWeight: 700, marginBottom: '0.25rem' }}>
-                    {hoveredNode.gender === 'M' ? (isRtl ? 'عضو مرد 👨' : 'MALE MEMBER 👨') : (isRtl ? 'عضو زن 👩' : 'FEMALE MEMBER 👩')}
-                  </div>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>{hoveredNode.name}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.15rem' }}>📅 {hoveredNode.date}</p>
-                  <div style={{ borderTop: '1px solid var(--border-color)', marginTop: '0.5rem', paddingTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {hoveredNode.info}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+              {/* Central Node */}
+              <div className="ultra-glass float-slow flex-center" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) translateZ(50px)', width: '140px', height: '140px', borderRadius: '50%', padding: '1rem', textAlign: 'center', border: '2px solid rgba(99, 102, 241, 0.4)' }}>
+                <div>
+                  <Globe size={32} color="#818cf8" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Heritage</div>
+                </div>
+              </div>
 
-            {/* SVG Flow Canvas */}
-            <svg width="100%" height="100%" viewBox="0 0 800 420" className="family-chart-svg" style={{ padding: '2rem' }}>
-              <defs>
-                <linearGradient id="link-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.4" />
-                </linearGradient>
-              </defs>
+              {/* Connected Node 1 (Top Left) */}
+              <div className="ultra-glass float-medium flex-center" style={{ position: 'absolute', top: '20%', left: '30%', transform: 'translate(-50%, -50%) translateZ(-30px)', width: '100px', height: '100px', borderRadius: '24px', padding: '1rem', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <Users size={28} color="#34d399" />
+              </div>
 
-              {/* Glowing Dynamic Lines */}
-              <path d="M 400,60 L 400,120" stroke="url(#link-grad)" strokeWidth="2.5" strokeDasharray="6,4" />
-              <path d="M 250,160 L 550,160" stroke="url(#link-grad)" strokeWidth="2.5" />
-              <path d="M 250,160 L 250,220" stroke="url(#link-grad)" strokeWidth="2.5" />
-              <path d="M 550,160 L 550,220" stroke="url(#link-grad)" strokeWidth="2.5" />
-              <path d="M 400,120 L 400,280" stroke="url(#link-grad)" strokeWidth="2" strokeDasharray="4,4" />
-              <path d="M 400,280 L 250,280" stroke="url(#link-grad)" strokeWidth="2" />
-              <path d="M 400,280 L 550,280" stroke="url(#link-grad)" strokeWidth="2" />
+              {/* Connected Node 2 (Top Right) */}
+              <div className="ultra-glass float-fast flex-center" style={{ position: 'absolute', top: '25%', left: '75%', transform: 'translate(-50%, -50%) translateZ(70px)', width: '110px', height: '110px', borderRadius: '50%', padding: '1rem', textAlign: 'center', border: '1px solid rgba(244, 114, 182, 0.3)' }}>
+                <Eye size={28} color="#f472b6" />
+              </div>
 
-              {/* Draw Nodes dynamically */}
-              {demoNodes.map((node) => {
-                const isMale = node.gender === 'M';
-                const accent = isMale ? '#38bdf8' : '#f472b6';
-                const bg = isMale ? 'rgba(56, 189, 248, 0.08)' : 'rgba(244, 114, 182, 0.08)';
-                const isHovered = hoveredNode?.id === node.id;
+              {/* Connected Node 3 (Bottom Left) */}
+              <div className="ultra-glass float-delayed flex-center" style={{ position: 'absolute', top: '80%', left: '25%', transform: 'translate(-50%, -50%) translateZ(90px)', width: '130px', height: '80px', borderRadius: '16px', padding: '1rem', textAlign: 'center', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                <GitMerge size={28} color="#38bdf8" />
+              </div>
 
-                return (
-                  <g 
-                    key={node.id} 
-                    transform={`translate(${node.x}, ${node.y})`}
-                    style={{ cursor: 'pointer' }}
-                    onMouseEnter={() => setHoveredNode(node)}
-                    onMouseLeave={() => setHoveredNode(null)}
-                  >
-                    {/* Shadow node glow on hover */}
-                    {isHovered && (
-                      <motion.rect
-                        x="-85"
-                        y="-30"
-                        width="170"
-                        height="60"
-                        rx="12"
-                        fill="none"
-                        stroke={accent}
-                        strokeWidth="5"
-                        style={{ filter: `blur(8px)`, opacity: 0.6 }}
-                        layoutId="glow-hover"
-                      />
-                    )}
-
-                    <rect 
-                      x="-80" 
-                      y="-25" 
-                      width="160" 
-                      height="50" 
-                      rx="10" 
-                      className={`demo-node-rect ${isMale ? 'male' : 'female'} ${isHovered ? 'hovered' : ''}`}
-                    />
-                    <text 
-                      x="0" 
-                      y="-2" 
-                      textAnchor="middle" 
-                      fill="var(--text-primary)" 
-                      fontSize="12" 
-                      fontWeight="600"
-                    >
-                      {node.name.split(' ')[0]}
-                    </text>
-                    <text 
-                      x="0" 
-                      y="14" 
-                      textAnchor="middle" 
-                      fill="var(--text-secondary)" 
-                      fontSize="10" 
-                      fontWeight="500"
-                    >
-                      {node.date}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+              {/* Connected Node 4 (Bottom Right) */}
+              <div className="ultra-glass float-medium flex-center" style={{ position: 'absolute', top: '85%', left: '65%', transform: 'translate(-50%, -50%) translateZ(-50px)', width: '90px', height: '90px', borderRadius: '50%', padding: '1rem', textAlign: 'center', border: '1px solid rgba(250, 204, 21, 0.3)' }}>
+                <Shield size={24} color="#facc15" />
+              </div>
+            </motion.div>
           </motion.div>
         </section>
 
@@ -287,6 +150,7 @@ function Landing() {
               className="feature-card"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -10, rotateX: 5, rotateY: -5, boxShadow: "0 25px 50px -12px rgba(99, 102, 241, 0.25)" }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
@@ -319,6 +183,7 @@ function Landing() {
               className="feature-card"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -10, rotateX: 5, rotateY: -5, boxShadow: "0 25px 50px -12px rgba(99, 102, 241, 0.25)" }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
@@ -351,6 +216,7 @@ function Landing() {
               className="feature-card"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -10, rotateX: 5, rotateY: -5, boxShadow: "0 25px 50px -12px rgba(99, 102, 241, 0.25)" }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
@@ -383,6 +249,7 @@ function Landing() {
               className="feature-card"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -10, rotateX: 5, rotateY: -5, boxShadow: "0 25px 50px -12px rgba(99, 102, 241, 0.25)" }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
             >
@@ -503,6 +370,7 @@ function Landing() {
               style={{ padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border-color)', position: 'relative' }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -15, rotateX: 2, rotateY: -2, scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
               viewport={{ once: true }}
             >
               <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{t('plan_free')}</h3>
@@ -526,6 +394,7 @@ function Landing() {
               style={{ padding: '2.5rem', borderRadius: '24px', border: '2px solid rgba(99, 102, 241, 0.5)', background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%)', position: 'relative' }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -15, rotateX: 2, rotateY: -2, scale: 1.02, boxShadow: "0 30px 60px rgba(99,102,241,0.25)" }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >

@@ -1310,6 +1310,43 @@ body, input, select, textarea, button {
   opacity: 0.4 !important;
 }
 
+/* 3D Elegant Landing Page Additions */
+.perspective-container {
+  perspective: 1500px;
+  transform-style: preserve-3d;
+}
 
+.preserve-3d {
+  transform-style: preserve-3d;
+}
 
+.ultra-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
 
+[data-theme="light"] .ultra-glass {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.07),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.float-slow { animation: float 8s ease-in-out infinite; }
+.float-medium { animation: float 6s ease-in-out infinite; }
+.float-fast { animation: float 4s ease-in-out infinite; }
+.float-delayed { animation: float 7s ease-in-out 2s infinite; }
+
+@keyframes float {
+  0% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+  50% { transform: translateY(-15px) rotateX(1deg) rotateY(-1deg); }
+  100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+}

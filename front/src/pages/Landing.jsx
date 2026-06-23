@@ -53,6 +53,61 @@ function Landing() {
     }
   };
 
+  return (
+    <div className="mesh-bg" style={{ minHeight: 'calc(100vh - 73px)', position: 'relative', overflow: 'hidden' }}>
+      <div className="dark-grid"></div>
+
+      {/* Decorative ambient light pools */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '20%',
+        width: '400px',
+        height: '400px',
+        background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }}></div>
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        right: '15%',
+        width: '500px',
+        height: '500px',
+        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0) 70%)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }}></div>
+
+      <div className="layout-container" style={{ position: 'relative', zIndex: 2, paddingTop: '4rem', paddingBottom: '6rem' }}>
+        
+        {/* Hero Banner Header */}
+        <section className="hero-section" style={{ padding: '2rem 0 4rem', zIndex: 2 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+
+            <h1 className="hero-title text-gradient" style={{ fontSize: '3.5rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              {t('slogan')}
+            </h1>
+            
+            <p className="hero-subtitle" style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginTop: '1.5rem', marginBottom: '2.5rem', maxWidth: '640px', lineHeight: 1.6 }}>
+              {t('landing_tagline')}
+            </p>
+
+            <div className="flex-center gap-1" style={{ flexWrap: 'wrap' }}>
+              <Link to="/auth/register" className="btn btn-primary" style={{ padding: '0.9rem 2.25rem', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', boxShadow: '0 0 20px rgba(99, 102, 241, 0.35)' }}>
+                <span>{t('get_started')}</span>
+                <ArrowRight size={18} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+              </Link>
+              <Link to="/auth/login" className="btn btn-secondary" style={{ padding: '0.9rem 2.25rem', fontSize: '1rem' }}>
+                <span>{t('login')}</span>
+              </Link>
+            </div>
+          </motion.div>
+
           {/* 3D Abstract Floating Network */}
           <motion.div
             className="perspective-container"

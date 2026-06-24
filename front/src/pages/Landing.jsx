@@ -373,34 +373,85 @@ function Landing() {
 
             {/* Simulated Scrolling Timeline Graphic */}
             <div className="glass-card" style={{ padding: '2.5rem', borderRadius: '20px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-              <div className="timeline-track">
-                <div className="timeline-line" style={{ insetInlineStart: '12px' }}></div>
+              <div className="timeline-track" style={{ position: 'relative' }}>
+                <div className="timeline-line" style={{ insetInlineStart: '24px' }}></div>
                 
-                <div style={{ position: 'relative', paddingInlineStart: '2.5rem', marginBottom: '2rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#10b981', border: '2px solid var(--bg-secondary)' }}></div>
+                <div className="timeline-item" style={{ position: 'relative', paddingInlineStart: '3.5rem', marginBottom: '2.5rem' }}>
+                  <div 
+                    className="timeline-node flex-center"
+                    style={{ 
+                      insetInlineStart: '14px', 
+                      top: '12px', 
+                      width: '24px', 
+                      height: '24px', 
+                      borderWidth: '2px',
+                      background: 'var(--bg-primary)',
+                      borderColor: '#10b981',
+                      boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{ transform: 'scale(0.85)', display: 'block' }}>🎂</span>
+                  </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۲۰/۰۲/۱۵' : '1941/05/05'}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
                 </div>
 
-                <div style={{ position: 'relative', paddingInlineStart: '2.5rem', marginBottom: '2rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#6366f1', border: '2px solid var(--bg-secondary)' }}></div>
+                <div className="timeline-item" style={{ position: 'relative', paddingInlineStart: '3.5rem', marginBottom: '2.5rem' }}>
+                  <div 
+                    className="timeline-node flex-center"
+                    style={{ 
+                      insetInlineStart: '14px', 
+                      top: '12px', 
+                      width: '24px', 
+                      height: '24px', 
+                      borderWidth: '2px',
+                      background: 'var(--bg-primary)',
+                      borderColor: '#6366f1',
+                      boxShadow: '0 0 8px rgba(99, 102, 241, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{ transform: 'scale(0.85)', display: 'block' }}>💍</span>
+                  </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۴۵/۰۶/۱۰' : '1966/09/01'}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
                 </div>
 
-                <div style={{ position: 'relative', paddingInlineStart: '2.5rem' }}>
-                  <div style={{ position: 'absolute', insetInlineStart: '4px', top: '4px', width: '13px', height: '13px', borderRadius: '50%', background: '#ef4444', border: '2px solid var(--bg-secondary)' }}></div>
+                <div className="timeline-item" style={{ position: 'relative', paddingInlineStart: '3.5rem' }}>
+                  <div 
+                    className="timeline-node flex-center"
+                    style={{ 
+                      insetInlineStart: '14px', 
+                      top: '12px', 
+                      width: '24px', 
+                      height: '24px', 
+                      borderWidth: '2px',
+                      background: 'var(--bg-primary)',
+                      borderColor: '#ef4444',
+                      boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{ transform: 'scale(0.85)', display: 'block' }}>🕊️</span>
+                  </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
                     {isRtl ? '۱۳۷۷/۱۰/۱۲' : '1998/12/30'}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem' }}>{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{isRtl ? 'درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل.' : 'Passed away leaving behind a robust heritage legacy.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل.' : 'Passed away leaving behind a robust heritage legacy.'}</p>
                 </div>
               </div>
             </div>

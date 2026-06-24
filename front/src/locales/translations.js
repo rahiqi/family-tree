@@ -3,8 +3,8 @@ export const resources = {
     translation: {
       "updated_label": "آخرین تغییر",
       "app_name": "شجره نامه",
-      "slogan": "داستان خانواده خود را زنده کنید",
-      "landing_tagline": "فضایی زیبا و صمیمی برای کاوش در پیشینه، اشتراک‌گذاری خاطرات عزیز و پیوند با نسل‌ها در کنار یکدیگر.",
+      "slogan": "درخت خانوادگی خود را ترسیم کنید",
+      "landing_tagline": "با تریلی، ریشه‌های خود را ثبت، متصل و برای همیشه حفظ کنید.",
       "get_started": "شروع رایگان",
       "login": "ورود",
       "register": "ثبت‌نام",
@@ -139,8 +139,8 @@ export const resources = {
     translation: {
       "updated_label": "Last updated",
       "app_name": "Treely",
-      "slogan": "Bring Your Family Story to Life.",
-      "landing_tagline": "A beautiful, inviting space to explore your ancestry, share cherished memories, and connect with generations—together.",
+      "slogan": "Visualize your family tree",
+      "landing_tagline": "Discover, connect, and preserve your heritage forever with Treely.",
       "get_started": "Get Started",
       "login": "Login",
       "register": "Register",

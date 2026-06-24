@@ -1,15 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
-
-@theme {
-  --color-brand-primary: #DE7B54;
-  --color-brand-primary-light: #F0A786;
-  --color-brand-dark: #2D241E;
-  --color-brand-light: #FFFDF9;
-  --color-brand-surface: rgba(255, 255, 255, 0.05);
-  
-  --font-serif: 'Playfair Display', serif;
-}
 
 :root {
   --font-en: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -44,14 +34,6 @@
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Aethel variables - default dark theme */
-  --bg-center: #241D19;
-  --bg-edge: #181310;
-  --text-main: #FFFDF9;
-  --glass-bg: rgba(36, 29, 25, 0.4);
-  --glass-border: rgba(255, 253, 249, 0.08);
-  --glass-shadow: rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="light"] {
@@ -74,14 +56,6 @@
   --shadow-md: 0 8px 16px -2px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
   --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.06), 0 10px 10px -5px rgba(15, 23, 42, 0.03);
   --shadow-premium: 0 25px 50px -12px rgba(79, 70, 229, 0.08);
-
-  /* Aethel variables - light theme override */
-  --bg-center: #FFFDF9;
-  --bg-edge: #F3ECE3;
-  --text-main: #2D241E;
-  --glass-bg: rgba(255, 253, 249, 0.7);
-  --glass-border: rgba(45, 36, 30, 0.08);
-  --glass-shadow: rgba(45, 36, 30, 0.05);
 }
 
 [data-theme="light"] .glass-card {
@@ -1375,106 +1349,4 @@ body, input, select, textarea, button {
   0% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
   50% { transform: translateY(-15px) rotateX(1deg) rotateY(-1deg); }
   100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
-}
-
-/* Floating animation node styles */
-.node-avatar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-  background-size: cover;
-  background-position: center;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease;
-}
-
-.node-avatar::before {
-  content: '';
-  position: absolute;
-  top: -5px; right: -5px; bottom: -5px; left: -5px;
-  z-index: -1;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-  opacity: 0.7;
-}
-
-[data-theme="dark"] .node-avatar::before {
-  background: linear-gradient(45deg, #DE7B54 0%, #F0A786 100%);
-}
-
-.node-polaroid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: white;
-  padding: 8px 8px 24px 8px;
-  border-radius: 4px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  transform: rotate(-5deg);
-}
-
-[data-theme="dark"] .node-polaroid {
-  background: #2D241E;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-}
-
-.polaroid-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background-color: #eee;
-  border-radius: 2px;
-}
-
-.tree-line {
-  position: absolute;
-  background: #DE7B54;
-  opacity: 0.25;
-  transform-origin: left center;
-}
-
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 var(--glass-shadow);
-  transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-/* Custom scrollbars matching Aethel */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-edge);
-}
-::-webkit-scrollbar-thumb {
-  background: #DE7B54;
-  border-radius: 4px;
-}
-
-#canvas-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1;
-  background: radial-gradient(circle at center, var(--bg-center) 0%, var(--bg-edge) 100%);
-  transition: background 0.5s ease;
-}
-
-#social-tree-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
 }

@@ -200,7 +200,7 @@ function Landing() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-73px)] flex items-center justify-center pt-24 pb-16 overflow-hidden">
+      <section className="relative min-h-[calc(100vh-73px)] flex items-center justify-center pt-24 pb-16 overflow-hidden z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10 w-full flex flex-col items-center text-center">
           
           <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-brand-primary/30 bg-brand-primary/10 text-brand-primary text-xs font-semibold tracking-widest uppercase fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -362,7 +362,7 @@ function Landing() {
             {/* Simulated Scrolling Timeline Graphic */}
             <div className="glass-panel p-8 sm:p-10 rounded-3xl text-start">
               <div className="timeline-track">
-                <div className="timeline-line" style={{ insetInlineStart: '12px', background: 'linear-gradient(to bottom, #DE7B54, #F0A786, #DE7B54)' }}></div>
+                <div className="timeline-line start-3 bg-gradient-to-b from-brand-primary via-brand-primary-light to-brand-primary"></div>
                 
                 <div className="relative ps-10 mb-8">
                   <div className="absolute start-[6px] top-[4px] w-[15px] h-[15px] rounded-full bg-emerald-500 border-2 border-brand-light dark:border-brand-dark z-10"></div>

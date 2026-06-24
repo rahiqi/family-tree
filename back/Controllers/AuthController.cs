@@ -10,6 +10,7 @@ using Google.Apis.Auth;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net.Http;
 
 namespace back.Controllers;
 
@@ -190,20 +191,16 @@ public class AuthController : ControllerBase
         {
             try
             {
-                var clientId = _config["Authentication:Google:ClientId"];
-                var settings = new GoogleJsonWebSignature.ValidationSettings()
-                {
-                    Audience = new[] { clientId }
-                };
-                var payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken, settings);
+                var clientId = _config["Authentication:Google:ClientId"] ?? "";
+                var payload = await ValidateGoogleTokenManualAsync(dto.IdToken, clientId);
                 email = payload.Email;
                 firstName = payload.GivenName ?? "";
                 lastName = payload.FamilyName ?? "";
                 googleId = payload.Subject;
             }
-            catch (InvalidJwtException)
+            catch (Exception ex)
             {
-                return Unauthorized(new { message = "Invalid Google token" });
+                return Unauthorized(new { message = "Invalid Google token: " + ex.Message });
             }
         }
 
@@ -323,7 +320,94 @@ public class AuthController : ControllerBase
             return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
         }
     }
-}
+
+    private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleTokenManualAsync(string idToken, string googleClientId)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            if (!handler.CanReadToken(idToken))
+            {
+                throw new Exception("Invalid token format");
+            }
+            
+            var jwtToken = handler.ReadJwtToken(idToken);
+            
+            IList<SecurityKey>? keys = null;
+            try
+            {
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(5);
+                var response = await client.GetStringAsync("https://www.googleapis.com/oauth2/v3/certs");
+                var jwkSet = new JsonWebKeySet(response);
+                keys = jwkSet.GetSigningKeys();
+            }
+            catch (Exception)
+            {
+                // Fallback to hardcoded Google keys if offline/geoblocked
+                var fallbackJson = @"
+                {
+                    ""keys"": [
+                        {
+                            ""use"": ""sig"",
+                            ""kid"": ""3035bb86d99f22e613467a6680825eeb0d8139a2"",
+                            ""alg"": ""RS256"",
+                            ""kty"": ""RSA"",
+                            ""e"": ""AQAB"",
+                            ""n"": ""9v8ffWKjUXk3eaIkYY6ylAMEvWbSfJiU56Exk9vhWsIkwuSMdr4NOBTPSAj0XRTC7hPLUskkogPCGM0k2JMmbG46OfpNIJyvym0lyPdd_xFoQvp8rVz3dtiGYjJ5-xa2wQGN1M4l0Zq3qZzFCD3-AXeu5PLVzT9N0SdR7jjWeN4QyrY_lQ0sGXDy0fOvbsylhskk-A8HPVuOlPiixb9VSa8E3Aw0LLJcvznObhq1XZfS6_p9BOt2zy5guK8UBSlThYInuFoFaXu4CIaPDLKE0NCxyWMmhOmWtCLblb2WfdPflBP-mUZW8PF7GLTaUw0IEbWef-LSRsS0uk-heISdJw""
+                        },
+                        {
+                            ""kty"": ""RSA"",
+                            ""e"": ""AQAB"",
+                            ""n"": ""_YiYSsfKSMg0sWfZxdcui2BYLSUlm-wJ9uG-hNuF4LIvgSAmeFNPR0tMw-QHW0bDRITcHzHK1zRAWcbpXgZ7V8A7eA5sH4ivEcqXWCV37vJxx6FEpFllMIW1zXoW3NNuP3ULNGl6mdpxYsNjquOxrypo0Dol7TsS1eLdk2C7SNesmQzI_2j-ZFIMtESZwdIWATV9EiMUgF5riffKb5jyNFMpPRVkI2G8X5ImIkiLPOs663PQPidVijrfOc4nV8PmPCsCqYUWuBkMGgzT6Am-tBem2h_facDhfmdgSCDHnYHi6PxIgyHIQSKU4jtF5sDJGuIORHNZwBUK2VNRcqf8xw"",
+                            ""use"": ""sig"",
+                            ""alg"": ""RS256"",
+                            ""kid"": ""d12978ba4c29ef1154a34e4870c7a3a51d26df10""
+                        },
+                        {
+                            ""use"": ""sig"",
+                            ""alg"": ""RS256"",
+                            ""kid"": ""8f4730071a99b44ef52dbd6dac2d96af3a7c9b3f"",
+                            ""kty"": ""RSA"",
+                            ""e"": ""AQAB"",
+                            ""n"": ""2eGGURDods69Y0yhtuq-zF3hLp1YotvE4WfmqxUoMXbfNy8lW4xiYVQRMlRDgEQgq01Yzm5vHjHcGWY2Ktgn62N4tWVjfStnlBavsF8MZ4JE7q3csepAzqa068r6Gkuyv7qqutx8G3WdBFhwlK6pwuVo1TNng6cmjumLIev2xy3ES7omfVRneHh-eHuim3ZJ8uSMAG2z4dcLUiTXKDofjkeBRHsgjbOwyHVyuYxnQTthHH8BmomQUu2hIqsHUTeJIEWreyQdjsAulLeFi1Ny3vWd4BQNvviQWjmBXNlCsaXEM5A2U1yvuGp_6zM4KJByEvPKH1cYfaw07xZAXViW2w""
+                        },
+                        {
+                            ""e"": ""AQAB"",
+                            ""n"": ""4rY5uwZK1dQ-UVgB5s4NLyC-u5LC2MT7b8GWZztiNgMsp0Nnqx0pM7Ofx0ws32N2aZcx10-J8ydQxnNb9uAcf-7LyhyOIcv_WEyzaSbUAMOgoF-nQmJetckxNg6ekhNfaFcTQS0T-29ql2_CBLIML6CvSh-r0fgWRsqN2ayB7wCl74Gv6OOVbvagUWhj5z2L6o_plmsPDwLVuvA7o3WDEDjoq-IXafRQowj92kQUenrOKD4YCopuLIBhel6VH8doFRNZ6KISQhMcOivWaLU_UtKKAMloGJieTf_3r-_nErs2h5wB7T7FrMCScmO7mvFQXKh8_4P-MlbfgS9CUvQksw"",
+                            ""kty"": ""RSA"",
+                            ""kid"": ""f10f87405a979c1df36df26606734f33cd85c271"",
+                            ""alg"": ""RS256"",
+                            ""use"": ""sig""
+                        }
+                    ]
+                }";
+                var jwkSet = new JsonWebKeySet(fallbackJson);
+                keys = jwkSet.GetSigningKeys();
+            }
+            
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuers = new[] { "accounts.google.com", "https://accounts.google.com" },
+                ValidateAudience = true,
+                ValidAudiences = new[] { googleClientId },
+                ValidateLifetime = true,
+                IssuerSigningKeys = keys,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+            
+            handler.ValidateToken(idToken, validationParameters, out var validatedToken);
+            
+            var payload = new GoogleJsonWebSignature.Payload
+            {
+                Email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email" || c.Type == ClaimTypes.Email)?.Value ?? string.Empty,
+                GivenName = jwtToken.Claims.FirstOrDefault(c => c.Type == "given_name" || c.Type == ClaimTypes.GivenName)?.Value ?? string.Empty,
+                FamilyName = jwtToken.Claims.FirstOrDefault(c => c.Type == "family_name" || c.Type == ClaimTypes.Surname)?.Value ?? string.Empty,
+                Subject = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == ClaimTypes.NameIdentifier)?.Value ?? string.Empty
+            };
+            
+            return payload;
+        }
+    }
 
 public class AnyTypeToStringConverter : JsonConverter<string>
 {

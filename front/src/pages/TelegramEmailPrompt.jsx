@@ -36,7 +36,7 @@ export default function TelegramEmailPrompt() {
       const payloadWithEmail = { ...telegramPayload, email };
       const response = await api.auth.loginWithTelegram(payloadWithEmail);
       
-      const data = JSON.parse(response);
+      const data = typeof response === 'string' ? JSON.parse(response) : response;
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));

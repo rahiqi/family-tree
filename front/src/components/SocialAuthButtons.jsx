@@ -14,7 +14,7 @@ export function SocialAuthButtons() {
     const fetchConfig = async () => {
       try {
         const response = await api.auth.getConfig();
-        const data = JSON.parse(response);
+        const data = typeof response === 'string' ? JSON.parse(response) : response;
         setConfig(data);
       } catch (err) {
         console.error('Failed to load auth config:', err);
@@ -25,7 +25,7 @@ export function SocialAuthButtons() {
 
   const handleAuthSuccess = (responseStr) => {
     try {
-      const data = JSON.parse(responseStr);
+      const data = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
       if (data.requires_email) {
         navigate('/auth/telegram-email', { state: { telegramPayload: data.telegramPayload } });
       } else if (data.token) {
@@ -69,7 +69,7 @@ export function SocialAuthButtons() {
         try {
           const res = await api.auth.loginWithTelegram(user);
           try {
-            const parsedRes = JSON.parse(res);
+            const parsedRes = typeof res === 'string' ? JSON.parse(res) : res;
             if (parsedRes.requires_email) {
               // Redirect to email prompt, pass the telegram payload
               navigate('/auth/telegram-email', { state: { telegramPayload: user } });
@@ -127,7 +127,7 @@ export function SocialAuthButtons() {
       };
       const res = await api.auth.loginWithTelegram(mockPayload);
       try {
-        const parsedRes = JSON.parse(res);
+        const parsedRes = typeof res === 'string' ? JSON.parse(res) : res;
         if (parsedRes.requires_email) {
           navigate('/auth/telegram-email', { state: { telegramPayload: mockPayload } });
         } else {

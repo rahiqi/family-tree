@@ -19,6 +19,9 @@ services:
     container_name: treely-backend
     ports:
       - "5263:5263"
+    dns:
+      - 178.22.122.100
+      - 185.51.200.2
     environment:
       - ConnectionStrings__MongoConnection=mongodb://mongodb:27017
       - DatabaseName=treely

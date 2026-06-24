@@ -8,6 +8,8 @@ using back.Data;
 using back.Models;
 using Google.Apis.Auth;
 using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace back.Controllers;
 
@@ -128,14 +130,33 @@ public class AuthController : ControllerBase
 
     public class TelegramAuthDto
     {
+        [JsonPropertyName("id")]
+        [JsonConverter(typeof(AnyTypeToStringConverter))]
         public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("first_name")]
         public string FirstName { get; set; } = string.Empty;
+
+        [JsonPropertyName("last_name")]
         public string LastName { get; set; } = string.Empty;
+
+        [JsonPropertyName("username")]
         public string Username { get; set; } = string.Empty;
+
+        [JsonPropertyName("photo_url")]
         public string PhotoUrl { get; set; } = string.Empty;
+
+        [JsonPropertyName("auth_date")]
+        [JsonConverter(typeof(AnyTypeToStringConverter))]
         public string AuthDate { get; set; } = string.Empty;
+
+        [JsonPropertyName("hash")]
         public string Hash { get; set; } = string.Empty;
+
+        [JsonPropertyName("isMock")]
         public bool IsMock { get; set; } = false;
+
+        [JsonPropertyName("email")]
         public string? Email { get; set; } // Provided when completing registration
     }
 
@@ -301,5 +322,39 @@ public class AuthController : ControllerBase
             var token = GenerateJwtToken(user);
             return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
         }
+    }
+}
+
+public class AnyTypeToStringConverter : JsonConverter<string>
+{
+    public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            return reader.GetString() ?? string.Empty;
+        }
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            if (reader.TryGetInt64(out long l))
+            {
+                return l.ToString();
+            }
+            if (reader.TryGetDouble(out double d))
+            {
+                return d.ToString();
+            }
+        }
+        if (reader.TokenType == JsonTokenType.True) return "true";
+        if (reader.TokenType == JsonTokenType.False) return "false";
+        
+        using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+        {
+            return document.RootElement.GetRawText();
+        }
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value);
     }
 }

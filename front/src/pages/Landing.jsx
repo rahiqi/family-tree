@@ -396,10 +396,10 @@ function Landing() {
                     <span style={{ transform: 'scale(0.85)', display: 'block' }}>🎂</span>
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
-                    {isRtl ? '۱۳۲۰/۰۲/۱۵' : '1941/05/05'}
+                    {t('timeline_date_1')}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'تولد بزرگ خاندان آرش' : 'Birth of Founder Arash'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.' : 'Born in the historic city of Shiraz, starting the family saga.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{t('timeline_title_1')}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{t('timeline_desc_1')}</p>
                 </div>
 
                 <div className="timeline-item" style={{ position: 'relative', paddingInlineStart: '3.5rem', marginBottom: '2.5rem' }}>
@@ -422,10 +422,10 @@ function Landing() {
                     <span style={{ transform: 'scale(0.85)', display: 'block' }}>💍</span>
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
-                    {isRtl ? '۱۳۴۵/۰۶/۱۰' : '1966/09/01'}
+                    {t('timeline_date_2')}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'ازدواج با سیمین' : 'Marriage with Simin'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.' : 'Wedding contract sealed, moving the family center to Tehran.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{t('timeline_title_2')}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{t('timeline_desc_2')}</p>
                 </div>
 
                 <div className="timeline-item" style={{ position: 'relative', paddingInlineStart: '3.5rem' }}>
@@ -448,10 +448,10 @@ function Landing() {
                     <span style={{ transform: 'scale(0.85)', display: 'block' }}>🕊️</span>
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '0.15rem 0.5rem', borderRadius: '99px' }}>
-                    {isRtl ? '۱۳۷۷/۱۰/۱۲' : '1998/12/30'}
+                    {t('timeline_date_3')}
                   </span>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{isRtl ? 'وفات بزرگ خاندان' : 'Death of Founder'}</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{isRtl ? 'درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل.' : 'Passed away leaving behind a robust heritage legacy.'}</p>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginTop: '0.5rem', textAlign: 'start' }}>{t('timeline_title_3')}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem', textAlign: 'start' }}>{t('timeline_desc_3')}</p>
                 </div>
               </div>
             </div>

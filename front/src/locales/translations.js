@@ -132,7 +132,16 @@ export const resources = {
       "feature_unlimited_photos": "عکس و آواتار نامحدود",
       "feature_rbac": "همکاری تیمی (دسترسی‌ها)",
       "feature_public_sharing": "اشتراک‌گذاری عمومی",
-      "feature_included": "شامل می‌شود"
+      "feature_included": "شامل می‌شود",
+      "timeline_date_1": "۱۳۲۰/۰۲/۱۵",
+      "timeline_title_1": "تولد مؤسس خاندان، آرتور",
+      "timeline_desc_1": "تولد در شهر تاریخی شیراز و آغاز سلسله خانوادگی.",
+      "timeline_date_2": "۱۳۴۵/۰۶/۱۰",
+      "timeline_title_2": "ازدواج با سوفیا",
+      "timeline_desc_2": "آغاز پیوند خانوادگی با ثبت پیمان عقد در تهران.",
+      "timeline_date_3": "۱۳۷۷/۱۰/۱۲",
+      "timeline_title_3": "وفات مؤسس خاندان",
+      "timeline_desc_3": "درگذشت پس از نیم قرن تلاش برای حفظ میراث فامیل."
     }
   },
   en: {
@@ -268,7 +277,16 @@ export const resources = {
       "feature_unlimited_photos": "Unlimited Photos & Avatars",
       "feature_rbac": "Team Collaboration (RBAC)",
       "feature_public_sharing": "Public Sharing",
-      "feature_included": "Included"
+      "feature_included": "Included",
+      "timeline_date_1": "1941/05/05",
+      "timeline_title_1": "Birth of Founder Arthur",
+      "timeline_desc_1": "Born in the historic city of Shiraz, starting the family saga.",
+      "timeline_date_2": "1966/09/01",
+      "timeline_title_2": "Marriage with Sophia",
+      "timeline_desc_2": "Wedding contract sealed, moving the family center to Tehran.",
+      "timeline_date_3": "1998/12/30",
+      "timeline_title_3": "Death of Founder",
+      "timeline_desc_3": "Passed away leaving behind a robust heritage legacy."
     }
   }
 };

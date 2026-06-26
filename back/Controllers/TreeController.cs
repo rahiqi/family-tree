@@ -262,57 +262,156 @@ public class TreeController : ControllerBase
         var ownerCollab = tree.Collaborators.FirstOrDefault(c => c.Role == "owner");
         var ownerIdStr = ownerCollab?.UserId.ToString() ?? string.Empty;
 
-        // If Editor, validate deletions and edits
-        if (collaborator.Role == "editor")
+        // 1. Get editor name
+        var userObj = await _context.Users.FindAsync(userId);
+        var editorName = userObj != null ? userObj.FirstName : "Someone";
+        if (string.IsNullOrEmpty(editorName)) editorName = userObj?.Email ?? "Someone";
+
+        // 2. Map of node names for easy lookup
+        var nameMap = new Dictionary<string, string>();
+        
+        string GetNodeName(string id, Dictionary<string, JsonObject> newNodes, Dictionary<string, JsonObject> oldNodes)
         {
-            var currentUserIdStr = userId.ToString();
+            if (nameMap.TryGetValue(id, out var cachedName)) return cachedName;
 
-            // 1. Check for Deletions
-            foreach (var kvp in oldNodesDict)
+            JsonObject? node = null;
+            if (newNodes.TryGetValue(id, out var n1)) node = n1;
+            else if (oldNodes.TryGetValue(id, out var n2)) node = n2;
+
+            if (node == null) return "Unknown Person";
+
+            var fName = node["data"]?["first name"]?.ToString() ?? node["data"]?["firstName"]?.ToString() ?? string.Empty;
+            var lName = node["data"]?["last name"]?.ToString() ?? node["data"]?["lastName"]?.ToString() ?? string.Empty;
+            var fullName = $"{fName} {lName}".Trim();
+            var result = string.IsNullOrEmpty(fullName) ? "Unnamed Person" : fullName;
+            nameMap[id] = result;
+            return result;
+        }
+
+        // 3. Track Changes
+        var relTypes = new[] { "parents", "spouses", "children" };
+        var relNamesEn = new Dictionary<string, (string Singular, string Plural)>()
+        {
+            { "parents", ("parent", "parents") },
+            { "spouses", ("spouse", "spouses") },
+            { "children", ("child", "children") }
+        };
+
+        foreach (var kvp in newNodesDict)
+        {
+            var nodeId = kvp.Key;
+            var newNodeObj = kvp.Value;
+
+            var changes = new List<string>();
+
+            if (oldNodesDict.TryGetValue(nodeId, out var oldNodeObj))
             {
-                var oldNodeId = kvp.Key;
-                var oldNodeObj = kvp.Value;
+                // Node existed: Check for edits
+                var oldFirstName = oldNodeObj["data"]?["first name"]?.ToString() ?? oldNodeObj["data"]?["firstName"]?.ToString() ?? string.Empty;
+                var newFirstName = newNodeObj["data"]?["first name"]?.ToString() ?? newNodeObj["data"]?["firstName"]?.ToString() ?? string.Empty;
+                var oldLastName = oldNodeObj["data"]?["last name"]?.ToString() ?? oldNodeObj["data"]?["lastName"]?.ToString() ?? string.Empty;
+                var newLastName = newNodeObj["data"]?["last name"]?.ToString() ?? newNodeObj["data"]?["lastName"]?.ToString() ?? string.Empty;
 
-                if (!newNodesDict.ContainsKey(oldNodeId))
+                if (oldFirstName != newFirstName || oldLastName != newLastName)
                 {
-                    // Node is deleted
-                    var addedBy = oldNodeObj["addedBy"]?.ToString() ?? string.Empty;
-                    var actualOwner = string.IsNullOrEmpty(addedBy) ? ownerIdStr : addedBy;
+                    var oldFullName = $"{oldFirstName} {oldLastName}".Trim();
+                    if (string.IsNullOrEmpty(oldFullName)) oldFullName = "Unnamed Person";
+                    var newFullName = $"{newFirstName} {newLastName}".Trim();
+                    if (string.IsNullOrEmpty(newFullName)) newFullName = "Unnamed Person";
 
-                    if (actualOwner != currentUserIdStr)
+                    changes.Add($"changed name from '{oldFullName}' to '{newFullName}'");
+                }
+
+                // Gender change
+                var oldGender = oldNodeObj["data"]?["gender"]?.ToString() ?? string.Empty;
+                var newGender = newNodeObj["data"]?["gender"]?.ToString() ?? string.Empty;
+                if (oldGender != newGender && !string.IsNullOrEmpty(oldGender))
+                {
+                    changes.Add($"changed gender from '{oldGender}' to '{newGender}'");
+                }
+
+                // Birthday change
+                var oldBday = oldNodeObj["data"]?["birthday"]?.ToString() ?? string.Empty;
+                var newBday = newNodeObj["data"]?["birthday"]?.ToString() ?? string.Empty;
+                if (oldBday != newBday && !string.IsNullOrEmpty(oldBday))
+                {
+                    changes.Add($"changed birthday from '{oldBday}' to '{newBday}'");
+                }
+
+                // Compare relationships
+                foreach (var relType in relTypes)
+                {
+                    var oldRels = oldNodeObj["rels"]?.AsObject()?[relType]?.AsArray()?.Select(x => x?.ToString() ?? string.Empty)?.Where(x => !string.IsNullOrEmpty(x))?.ToList() ?? new List<string>();
+                    var newRels = newNodeObj["rels"]?.AsObject()?[relType]?.AsArray()?.Select(x => x?.ToString() ?? string.Empty)?.Where(x => !string.IsNullOrEmpty(x))?.ToList() ?? new List<string>();
+
+                    var added = newRels.Except(oldRels).ToList();
+                    var removed = oldRels.Except(newRels).ToList();
+
+                    foreach (var relId in added)
                     {
-                        return StatusCode(403, "You can only delete nodes that you have added yourself.");
+                        var targetName = GetNodeName(relId, newNodesDict, oldNodesDict);
+                        changes.Add($"added {relNamesEn[relType].Singular} '{targetName}'");
+                    }
+
+                    foreach (var relId in removed)
+                    {
+                        var targetName = GetNodeName(relId, newNodesDict, oldNodesDict);
+                        changes.Add($"removed {relNamesEn[relType].Singular} '{targetName}'");
                     }
                 }
             }
-
-            // 2. Check for Edits (data object changes)
-            foreach (var kvp in newNodesDict)
+            else
             {
-                var newNodeId = kvp.Key;
-                var newNodeObj = kvp.Value;
+                // New Node added
+                changes.Add("created this family member node");
+            }
 
-                if (oldNodesDict.TryGetValue(newNodeId, out var oldNodeObj))
+            if (changes.Count > 0)
+            {
+                var isNew = false;
+                var profile = await _context.PersonProfiles.FirstOrDefaultAsync(p => p.TreeId == treeId && p.Id == nodeId);
+                if (profile == null)
                 {
-                    var oldDataJson = oldNodeObj["data"]?.ToJsonString() ?? "{}";
-                    var newDataJson = newNodeObj["data"]?.ToJsonString() ?? "{}";
-
-                    if (oldDataJson != newDataJson)
+                    profile = new PersonProfile
                     {
-                        // Node data has changed
-                        var addedBy = oldNodeObj["addedBy"]?.ToString() ?? string.Empty;
-                        var actualOwner = string.IsNullOrEmpty(addedBy) ? ownerIdStr : addedBy;
+                        Id = nodeId,
+                        TreeId = treeId,
+                        Biography = string.Empty,
+                        AvatarUrl = string.Empty,
+                        PhotoAlbum = new(),
+                        TimelineEvents = new(),
+                        ChangeLogs = new()
+                    };
+                    _context.PersonProfiles.Add(profile);
+                    isNew = true;
+                }
 
-                        if (actualOwner != currentUserIdStr)
-                        {
-                            return StatusCode(403, "You can only edit nodes that you have added yourself.");
-                        }
-                    }
+                if (profile.ChangeLogs == null)
+                {
+                    profile.ChangeLogs = new List<ChangeLogEntry>();
+                }
+
+                foreach (var changeDesc in changes)
+                {
+                    profile.ChangeLogs.Add(new ChangeLogEntry
+                    {
+                        ChangedBy = editorName,
+                        Description = changeDesc,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                // Keep only the last 10 logs
+                profile.ChangeLogs = profile.ChangeLogs.OrderByDescending(c => c.Timestamp).Take(10).ToList();
+                
+                if (!isNew)
+                {
+                    _context.Entry(profile).State = EntityState.Modified;
                 }
             }
         }
 
-        // 3. Process newGraph to set/preserve addedBy fields
+        // 4. Process newGraph to set/preserve addedBy fields
         foreach (var node in newGraph)
         {
             if (node is JsonObject obj && obj["id"] != null)
@@ -440,5 +539,81 @@ public class TreeController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(tree.Collaborators);
+    }
+
+    [HttpGet("{treeId}/history")]
+    public async Task<IActionResult> GetTreeHistory(Guid treeId)
+    {
+        var userId = GetCurrentUserId();
+        var tree = await _context.FamilyTrees.FindAsync(treeId);
+        if (tree == null)
+        {
+            return NotFound("Family tree not found.");
+        }
+
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        if (tree.IsPublic != true && collaborator == null)
+        {
+            return Forbid("You do not have access to this family tree.");
+        }
+
+        // Parse tree graph data to map person IDs to names so we can display target names in logs
+        var personMap = new Dictionary<string, string>();
+        try
+        {
+            var graph = JsonNode.Parse(tree.TreeGraphJsonData ?? "[]")?.AsArray();
+            if (graph != null)
+            {
+                foreach (var node in graph)
+                {
+                    if (node == null) continue;
+                    var id = node["id"]?.ToString();
+                    if (string.IsNullOrEmpty(id)) continue;
+
+                    var dataNode = node["data"];
+                    var fName = dataNode?["first name"]?.ToString() ?? dataNode?["firstName"]?.ToString() ?? string.Empty;
+                    var lName = dataNode?["last name"]?.ToString() ?? dataNode?["lastName"]?.ToString() ?? string.Empty;
+                    var fullName = $"{fName} {lName}".Trim();
+                    personMap[id] = string.IsNullOrEmpty(fullName) ? "Unnamed Person" : fullName;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore parse errors
+        }
+
+        // Fetch all profiles for this tree
+        var profiles = await _context.PersonProfiles
+            .Where(p => p.TreeId == treeId)
+            .ToListAsync();
+
+        var historyList = new List<object>();
+
+        foreach (var profile in profiles)
+        {
+            personMap.TryGetValue(profile.Id, out var targetPersonName);
+            if (string.IsNullOrEmpty(targetPersonName)) targetPersonName = "Removed Member";
+
+            foreach (var log in profile.ChangeLogs)
+            {
+                historyList.Add(new
+                {
+                    log.ChangedBy,
+                    log.Description,
+                    log.Timestamp,
+                    PersonId = profile.Id,
+                    PersonName = targetPersonName
+                });
+            }
+        }
+
+        // Sort by timestamp descending
+        var sortedHistory = historyList
+            .OrderByDescending(h => ((dynamic)h).Timestamp)
+            .Take(30)
+            .ToList();
+
+        return Ok(sortedHistory);
     }
 }

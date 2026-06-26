@@ -16,6 +16,7 @@ function TreeCanvas() {
   const { treeId } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const isFa = i18n.language === 'fa';
   
   const containerRef = useRef(null);
   const chartInstanceRef = useRef(null);
@@ -64,6 +65,12 @@ function TreeCanvas() {
   const [modalDatePickerOpen, setModalDatePickerOpen] = useState(false);
   const [modalDatePickerValue, setModalDatePickerValue] = useState('');
   const [targetInputEl, setTargetInputEl] = useState(null);
+
+  // Tree change history sidebar states
+  const [showHistorySidebar, setShowHistorySidebar] = useState(false);
+  const [historyLogs, setHistoryLogs] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
 
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -259,7 +266,6 @@ function TreeCanvas() {
             </div>
           `;
         });
-
       // Bind card click overrides
       f3Card.setOnCardClick((e, d) => {
         // If clicked on view profile link/btn
@@ -276,34 +282,7 @@ function TreeCanvas() {
 
         // Open edit box if authorized
         if (f3Chart.editTreeInstance && !f3Chart.editTreeInstance.no_edit) {
-          const isOwner = userRole === 'owner';
-          const currentId = currentUser.id || currentUser.Id;
-          const isOwnNode = d.data.addedBy && currentId && d.data.addedBy.toLowerCase() === currentId.toLowerCase();
-
-          if (isOwner || isOwnNode) {
-            f3Chart.editTreeInstance.open(d.data);
-          } else {
-            // Show a visual warning indicator that it's read-only
-            const warningBar = document.createElement('div');
-            warningBar.innerHTML = t('editor_own_nodes_warning');
-            warningBar.style.cssText = `
-              position: fixed;
-              bottom: 2rem;
-              left: 50%;
-              transform: translateX(-50%);
-              background: var(--danger);
-              color: white;
-              padding: 0.75rem 2rem;
-              border-radius: 99px;
-              z-index: 9999;
-              font-weight: 600;
-              box-shadow: var(--shadow-lg);
-              text-align: center;
-              font-size: 0.9rem;
-            `;
-            document.body.appendChild(warningBar);
-            setTimeout(() => warningBar.remove(), 3000);
-          }
+          f3Chart.editTreeInstance.open(d.data);
         }
       });
 
@@ -313,9 +292,8 @@ function TreeCanvas() {
           .setFields([
             { id: 'first name', label: t('first_name'), type: 'text' },
             { id: 'last name', label: t('last_name'), type: 'text' },
-            { id: 'gender', label: t('role'), type: 'select', options: [{ value: 'M', label: 'Male' }, { value: 'F', label: 'Female' }] },
+            { id: 'gender', label: t('gender'), type: 'select', options: [{ value: 'M', label: isFa ? 'مرد' : 'Male' }, { value: 'F', label: isFa ? 'زن' : 'Female' }] },
             { id: 'birthday', label: t('birthday'), type: 'text' }
-
           ])
           .setEditFirst(true)
           .setLinkExistingRelConfig({
@@ -672,7 +650,7 @@ function TreeCanvas() {
 
                 <div className="responsive-form-grid">
                   <div className="form-group">
-                    <label className="form-label">{t('role')} (Gender)</label>
+                    <label className="form-label">{t('gender')}</label>
                     <select
                       className="form-input"
                       value={firstPerson.gender}

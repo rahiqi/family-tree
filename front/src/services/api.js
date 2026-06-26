@@ -107,7 +107,7 @@ export const api = {
       request(`/tree/${treeId}/collaborator/${userId}`, {
         method: 'DELETE'
       }),
-
+    getHistory: (treeId) => request(`/tree/${treeId}/history`),
   },
   profile: {
     get: (treeId, personId) => request(`/tree/${treeId}/profile/${personId}`),
@@ -121,6 +121,41 @@ export const api = {
       const formData = new FormData();
       formData.append('file', file);
       return request(`/tree/${treeId}/profile/${personId}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+    }
+  },
+  party: {
+    getAll: (treeId) => request(`/tree/${treeId}/party`),
+    get: (treeId, partyId) => request(`/tree/${treeId}/party/${partyId}`),
+    create: (treeId, data) => 
+      request(`/tree/${treeId}/party`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    update: (treeId, partyId, data) => 
+      request(`/tree/${treeId}/party/${partyId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    delete: (treeId, partyId) => 
+      request(`/tree/${treeId}/party/${partyId}`, {
+        method: 'DELETE'
+      }),
+    join: (treeId, partyId) => 
+      request(`/tree/${treeId}/party/${partyId}/join`, {
+        method: 'POST'
+      }),
+    sponsor: (treeId, partyId, amount) => 
+      request(`/tree/${treeId}/party/${partyId}/sponsor`, {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      }),
+    uploadPhoto: (treeId, partyId, file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return request(`/tree/${treeId}/party/${partyId}/upload`, {
         method: 'POST',
         body: formData
       });

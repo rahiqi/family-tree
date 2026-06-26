@@ -15,6 +15,7 @@ public class TreelyDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<FamilyTree> FamilyTrees => Set<FamilyTree>();
     public DbSet<PersonProfile> PersonProfiles => Set<PersonProfile>();
+    public DbSet<FamilyParty> FamilyParties => Set<FamilyParty>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,5 +25,6 @@ public class TreelyDbContext : DbContext
         modelBuilder.Entity<User>().ToCollection("users");
         modelBuilder.Entity<FamilyTree>().ToCollection("family_trees");
         modelBuilder.Entity<PersonProfile>().ToCollection("person_profiles");
+        modelBuilder.Entity<FamilyParty>().ToCollection("family_parties");
     }
 }

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Calendar, Filter, Heart, Gift, Briefcase, Award, Clock, Info, User 
+  ArrowLeft, Calendar, Filter, Heart, Gift, Briefcase, Award, Clock, Info, User, Plus 
 } from 'lucide-react';
 import { api, API_ORIGIN } from '../services/api';
 import DateObject from 'react-date-object';
@@ -21,6 +21,8 @@ const getEventIcon = (type) => {
       return <Heart className="w-5 h-5 text-pink-500" />;
     case 'death':
       return <span className="text-xl">🕊️</span>;
+    case 'party':
+      return <span className="text-xl">🎉</span>;
     case 'education':
       return <Award className="w-5 h-5 text-emerald-400" />;
     case 'career':
@@ -38,6 +40,7 @@ function TreeCalendar() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [treeInfo, setTreeInfo] = useState(null);
+  const [userRole, setUserRole] = useState('visitor');
   const [error, setError] = useState('');
   
   // Navigation tabs: 'upcoming' or 'chronological'
@@ -48,6 +51,7 @@ function TreeCalendar() {
     birthday: true,
     marriage: true,
     death: true,
+    party: true,
     others: true
   });
 
@@ -62,6 +66,7 @@ function TreeCalendar() {
       
       const treeRes = await api.tree.get(treeId);
       setTreeInfo(treeRes);
+      setUserRole(treeRes.userRole || treeRes.UserRole || 'visitor');
 
       const eventsData = await api.profile.getCalendar(treeId);
       setEvents(eventsData);
@@ -73,7 +78,7 @@ function TreeCalendar() {
   };
 
   // Anniversary calculation function utilizing react-date-object
-  const getEventAnniversaryDetails = (gregDateStr) => {
+  const getEventAnniversaryDetails = (gregDateStr, type, recurrence) => {
     if (!gregDateStr) return null;
 
     const targetCalendar = isFa ? persian : gregorian;
@@ -85,33 +90,117 @@ function TreeCalendar() {
 
       // 2. Get today's date in target calendar
       const today = new DateObject({ calendar: targetCalendar, locale: targetLocale });
-
-      // 3. Construct anniversary in the current calendar year
-      let anniversaryYear = today.year;
-      const anniversaryDate = new DateObject({
-        year: anniversaryYear,
-        month: origDate.month,
-        day: origDate.day,
-        calendar: targetCalendar,
-        locale: targetLocale
-      });
-
-      // 4. If the anniversary has already passed this calendar year, shift to next year
-      anniversaryDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
       const todayStart = new DateObject({ calendar: targetCalendar, locale: targetLocale }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-
-      if (anniversaryDate.valueOf() < todayStart.valueOf()) {
-        anniversaryYear += 1;
-        anniversaryDate.year = anniversaryYear;
-      }
-
-      // 5. Calculate days remaining
       const oneDayMs = 24 * 60 * 60 * 1000;
-      const diffMs = anniversaryDate.valueOf() - todayStart.valueOf();
-      const daysRemaining = Math.max(0, Math.ceil(diffMs / oneDayMs));
 
-      // 6. Years elapsed at the next anniversary
-      const yearsElapsed = anniversaryYear - origDate.year;
+      let anniversaryDate;
+      let daysRemaining = 0;
+      let yearsElapsed = 0;
+
+      if (type === 'party') {
+        if (recurrence === 'one-time') {
+          anniversaryDate = new DateObject({
+            year: origDate.year,
+            month: origDate.month.number,
+            day: origDate.day,
+            calendar: targetCalendar,
+            locale: targetLocale
+          }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+          const diffMs = anniversaryDate.valueOf() - todayStart.valueOf();
+          daysRemaining = Math.ceil(diffMs / oneDayMs); // Can be negative if in the past
+          yearsElapsed = 0;
+        } else if (recurrence === 'monthly') {
+          let anniversaryMonth = today.month.number;
+          let anniversaryYear = today.year;
+          
+          anniversaryDate = new DateObject({
+            year: anniversaryYear,
+            month: anniversaryMonth,
+            day: 1,
+            calendar: targetCalendar,
+            locale: targetLocale
+          }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+          anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+
+          if (anniversaryDate.valueOf() < todayStart.valueOf()) {
+            anniversaryMonth += 1;
+            if (anniversaryMonth > 12) {
+              anniversaryMonth = 1;
+              anniversaryYear += 1;
+            }
+            anniversaryDate = new DateObject({
+              year: anniversaryYear,
+              month: anniversaryMonth,
+              day: 1,
+              calendar: targetCalendar,
+              locale: targetLocale
+            }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+          }
+
+          const diffMs = anniversaryDate.valueOf() - todayStart.valueOf();
+          daysRemaining = Math.max(0, Math.ceil(diffMs / oneDayMs));
+          yearsElapsed = 0;
+        } else {
+          // yearly party
+          let anniversaryYear = today.year;
+          anniversaryDate = new DateObject({
+            year: anniversaryYear,
+            month: origDate.month.number,
+            day: 1,
+            calendar: targetCalendar,
+            locale: targetLocale
+          }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+          anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+
+          if (anniversaryDate.valueOf() < todayStart.valueOf()) {
+            anniversaryYear += 1;
+            anniversaryDate = new DateObject({
+              year: anniversaryYear,
+              month: origDate.month.number,
+              day: 1,
+              calendar: targetCalendar,
+              locale: targetLocale
+            }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+          }
+
+          const diffMs = anniversaryDate.valueOf() - todayStart.valueOf();
+          daysRemaining = Math.max(0, Math.ceil(diffMs / oneDayMs));
+          yearsElapsed = anniversaryYear - origDate.year;
+        }
+      } else {
+        // Standard birthday/marriage/death/milestone (yearly recurring)
+        let anniversaryYear = today.year;
+        anniversaryDate = new DateObject({
+          year: anniversaryYear,
+          month: origDate.month.number,
+          day: 1,
+          calendar: targetCalendar,
+          locale: targetLocale
+        }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+        anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+
+        if (anniversaryDate.valueOf() < todayStart.valueOf()) {
+          anniversaryYear += 1;
+          anniversaryDate = new DateObject({
+            year: anniversaryYear,
+            month: origDate.month.number,
+            day: 1,
+            calendar: targetCalendar,
+            locale: targetLocale
+          }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+          anniversaryDate.day = Math.min(origDate.day, anniversaryDate.daysInMonth);
+        }
+
+        const diffMs = anniversaryDate.valueOf() - todayStart.valueOf();
+        daysRemaining = Math.max(0, Math.ceil(diffMs / oneDayMs));
+        yearsElapsed = anniversaryYear - origDate.year;
+      }
 
       return {
         originalDateFormatted: origDate.format(isFa ? "YYYY/MM/DD" : "YYYY-MM-DD"),
@@ -127,6 +216,9 @@ function TreeCalendar() {
   };
 
   const getLocalizedEventName = (ev) => {
+    if (ev.type === 'party') {
+      return ev.title;
+    }
     const name = ev.personName || t('unnamed_person');
     switch (ev.type) {
       case 'birthday':
@@ -151,7 +243,7 @@ function TreeCalendar() {
   // Process and filter events
   const processedEvents = events
     .map(ev => {
-      const details = getEventAnniversaryDetails(ev.date);
+      const details = getEventAnniversaryDetails(ev.date, ev.type, ev.recurrence);
       return {
         ...ev,
         anniversary: details
@@ -159,11 +251,16 @@ function TreeCalendar() {
     })
     .filter(ev => {
       if (!ev.anniversary) return false;
-      const isOther = !['birthday', 'marriage', 'death'].includes(ev.type);
+
+      // For upcoming tab, filter out past one-time events (daysRemaining < 0)
+      if (activeTab === 'upcoming' && ev.anniversary.daysRemaining < 0) return false;
+
+      const isOther = !['birthday', 'marriage', 'death', 'party'].includes(ev.type);
       
       if (ev.type === 'birthday' && !filters.birthday) return false;
       if (ev.type === 'marriage' && !filters.marriage) return false;
       if (ev.type === 'death' && !filters.death) return false;
+      if (ev.type === 'party' && !filters.party) return false;
       if (isOther && !filters.others) return false;
       
       return true;
@@ -230,6 +327,8 @@ function TreeCalendar() {
     );
   }
 
+  const canAddParty = userRole === 'owner' || userRole === 'editor';
+
   return (
     <div className="mesh-bg" style={{ minHeight: 'calc(100vh - 73px)', position: 'relative', overflow: 'hidden', paddingBottom: '6rem' }}>
       <div className="dark-grid"></div>
@@ -253,6 +352,19 @@ function TreeCalendar() {
               {t('calendar_subtitle')}
             </p>
           </motion.div>
+
+          {canAddParty && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{ display: 'flex', gap: '0.75rem' }}
+            >
+              <Link to={`/tree/${treeId}/party/new`} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                <Plus size={18} />
+                <span>{t('add_party')}</span>
+              </Link>
+            </motion.div>
+          )}
         </div>
 
         {error && (
@@ -306,6 +418,16 @@ function TreeCalendar() {
                   style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
                 />
                 <span>{t('filter_deaths')}</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                <input 
+                  type="checkbox" 
+                  checked={filters.party} 
+                  onChange={() => toggleFilter('party')} 
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
+                />
+                <span>{t('party') + ' 🎉'}</span>
               </label>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
@@ -394,6 +516,7 @@ function TreeCalendar() {
                       let countdownText = '';
                       if (daysLeft === 0) countdownText = t('days_remaining_today');
                       else if (daysLeft === 1) countdownText = t('days_remaining_tomorrow');
+                      else if (daysLeft < 0) countdownText = isFa ? 'برگزار شده' : 'Concluded';
                       else countdownText = t('days_remaining_in_days', { count: daysLeft });
 
                       return (
@@ -420,7 +543,7 @@ function TreeCalendar() {
                             }}
                           >
                             <span style={{ transform: 'scale(0.85)', display: 'block' }}>
-                              {ev.type === 'birthday' ? '🎂' : ev.type === 'marriage' ? '💍' : ev.type === 'death' ? '🕊️' : '✏️'}
+                              {ev.type === 'birthday' ? '🎂' : ev.type === 'marriage' ? '💍' : ev.type === 'death' ? '🕊️' : ev.type === 'party' ? '🎉' : '✏️'}
                             </span>
                           </div>
 
@@ -432,7 +555,7 @@ function TreeCalendar() {
 
                             {/* Content Detail Card */}
                             <Link 
-                              to={`/tree/${treeId}/profile/${ev.personId}`}
+                              to={ev.type === 'party' ? `/tree/${treeId}/party/${ev.id}` : `/tree/${treeId}/profile/${ev.personId}`}
                               className="timeline-content-card glass-card"
                               style={{ 
                                 flexGrow: 1, 
@@ -447,7 +570,22 @@ function TreeCalendar() {
                             >
                               {/* Avatar Thumbnail */}
                               <div style={{ flexShrink: 0 }}>
-                                {ev.personAvatar ? (
+                                {ev.type === 'party' ? (
+                                  <div style={{
+                                    width: '46px',
+                                    height: '46px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                                    color: '#ec4899',
+                                    border: '2px solid rgba(236, 72, 153, 0.3)',
+                                    fontSize: '1.4rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}>
+                                    🎉
+                                  </div>
+                                ) : ev.personAvatar ? (
                                   <img 
                                     src={`${API_ORIGIN}${ev.personAvatar}`} 
                                     alt={ev.personName} 
@@ -528,7 +666,7 @@ function TreeCalendar() {
                                     fontWeight: 700,
                                     padding: '0.35rem 0.75rem',
                                     borderRadius: '99px',
-                                    backgroundColor: daysLeft === 0 ? 'rgba(16, 185, 129, 0.15)' : daysLeft === 1 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                                    backgroundColor: daysLeft === 0 ? 'rgba(16, 185, 129, 0.15)' : daysLeft === 1 ? 'rgba(245, 158, 11, 0.15)' : daysLeft < 0 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.05)',
                                     color: daysLeft === 0 ? 'var(--success)' : daysLeft === 1 ? 'var(--warning)' : 'var(--text-secondary)',
                                     border: daysLeft === 0 ? '1px solid rgba(16, 185, 129, 0.3)' : daysLeft === 1 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid var(--border-color)'
                                   }}>

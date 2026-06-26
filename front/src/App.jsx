@@ -10,6 +10,8 @@ import TreeCanvas from './pages/TreeCanvas';
 import ProfileView from './pages/ProfileView';
 import TreeCalendar from './pages/TreeCalendar';
 import TelegramEmailPrompt from './pages/TelegramEmailPrompt';
+import PartyForm from './pages/PartyForm';
+import PartyDetails from './pages/PartyDetails';
 import { CuteFamilyTreeLogo } from './components/CuteFamilyTreeLogo';
 
 function App() {
@@ -101,6 +103,9 @@ function App() {
           <Route path="/tree/:treeId" element={<TreeCanvas />} />
           <Route path="/tree/:treeId/profile/:id" element={<ProfileView />} />
           <Route path="/tree/:treeId/calendar" element={<TreeCalendar />} />
+          <Route path="/tree/:treeId/party/new" element={isLoggedIn ? <PartyForm /> : <Navigate to="/auth/login" />} />
+          <Route path="/tree/:treeId/party/:partyId" element={isLoggedIn ? <PartyDetails /> : <Navigate to="/auth/login" />} />
+          <Route path="/tree/:treeId/party/:partyId/edit" element={isLoggedIn ? <PartyForm /> : <Navigate to="/auth/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

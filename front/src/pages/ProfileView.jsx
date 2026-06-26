@@ -511,6 +511,40 @@ function ProfileView() {
               </div>
             )}
 
+            {/* Change History Log Book */}
+            {profile?.changeLogs && profile.changeLogs.length > 0 && (
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
+                  <History size={18} style={{ color: 'var(--accent)' }} />
+                  <span>{isRtl ? 'تاریخچه تغییرات' : 'Change History'}</span>
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '200px', overflowY: 'auto', padding: '0.2rem' }}>
+                  {profile.changeLogs.map((log, index) => {
+                    const dateVal = new Date(log.timestamp);
+                    const formattedDate = dateVal.toLocaleDateString(isRtl ? 'fa-IR' : 'en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+                    
+                    return (
+                      <div key={index} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.5rem 0.75rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.15rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{log.changedBy}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{formattedDate}</span>
+                        </div>
+                        <div style={{ textDirection: 'ltr', textAlign: 'start' }}>
+                          {log.description}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
 

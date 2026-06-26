@@ -54,6 +54,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<back.Services.TelegramNotificationService>();
 
 // Configure Swagger with JWT support
 builder.Services.AddEndpointsApiExplorer();

@@ -14,6 +14,7 @@ public class PersonProfile
     public string? AvatarUrl { get; set; }
     public List<MediaAsset> PhotoAlbum { get; set; } = new();
     public List<TimelineEvent> TimelineEvents { get; set; } = new();
+    public List<ChangeLogEntry> ChangeLogs { get; set; } = new();
 }
 
 public class MediaAsset
@@ -29,4 +30,11 @@ public class TimelineEvent
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Type { get; set; } = "custom"; // birthday, education, career, marriage, death, custom
+}
+
+public class ChangeLogEntry
+{
+    public string ChangedBy { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }

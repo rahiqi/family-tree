@@ -299,6 +299,42 @@ public class ProfileController : ControllerBase
             }
         }
 
+        // Fetch visible parties for this tree
+        var isManager = collaborator != null && (collaborator.Role == "owner" || collaborator.Role == "editor");
+        var parties = await _context.FamilyParties
+            .Where(p => p.TreeId == treeId)
+            .ToListAsync();
+
+        var visibleParties = parties
+            .Where(p => p.IsPublic || isManager || (userId != Guid.Empty && (p.CreatorId == userId || p.AllowedMemberIds.Contains(userId))))
+            .ToList();
+
+        foreach (var party in visibleParties)
+        {
+            var isParticipant = userId != Guid.Empty && (
+                party.Participants.Any(p => p.UserId == userId) ||
+                party.Sponsorships.Any(s => s.UserId == userId) ||
+                party.CreatorId == userId
+            );
+
+            events.Add(new
+            {
+                Id = party.Id.ToString(),
+                party.Date,
+                Title = party.Title,
+                Description = party.Description,
+                Type = "party",
+                Location = (isManager || isParticipant) ? party.Location : "Only visible to participants",
+                Time = party.Time,
+                Recurrence = party.Recurrence,
+                NeedsSponsor = party.NeedsSponsor,
+                TargetAmount = party.TargetAmount,
+                TotalSponsorships = party.Sponsorships.Sum(s => s.Amount),
+                PersonName = "Family Party", // Placeholder for list layouts
+                PersonGender = "F" // Non-critical placeholder
+            });
+        }
+
         return Ok(events);
     }
 }

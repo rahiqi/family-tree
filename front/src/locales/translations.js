@@ -182,7 +182,12 @@ export const resources = {
       "pledged": "تعهد شده",
       "target": "هدف",
       "delete_party_confirm": "آیا از حذف این مهمانی مطمئن هستید؟",
-      "party_created_success": "مهمانی فامیلی با موفقیت ثبت شد."
+      "party_created_success": "مهمانی فامیلی با موفقیت ثبت شد.",
+      "change_history": "تاریخچه تغییرات",
+      "tree_change_history": "تاریخچه تغییرات شجره‌نامه",
+      "history_member_label": "عضو:",
+      "no_history_logs": "هیچ تغییری یافت نشد.",
+      "failed_load_history": "خطا در بارگذاری تاریخچه تغییرات."
     }
   },
   en: {
@@ -368,7 +373,12 @@ export const resources = {
       "pledged": "Pledged",
       "target": "Target",
       "delete_party_confirm": "Are you sure you want to delete this party?",
-      "party_created_success": "Family party created successfully."
+      "party_created_success": "Family party created successfully.",
+      "change_history": "Change History",
+      "tree_change_history": "Tree Change History",
+      "history_member_label": "Member:",
+      "no_history_logs": "No changes found.",
+      "failed_load_history": "Failed to load change history."
     }
   }
 };

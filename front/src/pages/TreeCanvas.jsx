@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Save, Users, Plus, X, Trash2, Shield, 
-  Settings, UserPlus, Info, Check, AlertCircle, Edit, Calendar 
+  Settings, UserPlus, Info, Check, AlertCircle, Edit, Calendar, History
 } from 'lucide-react';
 import * as f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
@@ -95,6 +95,19 @@ function TreeCanvas() {
       setError(err.message || 'Failed to load family tree.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHistoryLogs = async () => {
+    try {
+      setHistoryLoading(true);
+      setHistoryError('');
+      const res = await api.tree.getHistory(treeId);
+      setHistoryLogs(res || []);
+    } catch (err) {
+      setHistoryError(err.message || t('failed_load_history'));
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -572,6 +585,18 @@ function TreeCanvas() {
               <span>{t('collaborators')} ({collaborators.length})</span>
             </button>
           )}
+
+          <button 
+            className="btn btn-secondary"
+            onClick={() => {
+              fetchHistoryLogs();
+              setShowHistorySidebar(true);
+            }}
+            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+          >
+            <History size={16} />
+            <span>{t('change_history')}</span>
+          </button>
         </div>
       </div>
 
@@ -696,6 +721,103 @@ function TreeCanvas() {
             </span>
           </div>
         )}
+
+        {/* Change History Sidebar */}
+        <AnimatePresence>
+          {showHistorySidebar && (
+            <motion.div
+              initial={{ opacity: 0, x: isFa ? -350 : 350 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isFa ? -350 : 350 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                insetInlineEnd: 0,
+                width: '350px',
+                backgroundColor: 'var(--bg-secondary)',
+                borderInlineStart: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-lg)',
+                zIndex: 200,
+                display: 'flex',
+                flexDirection: 'column',
+                backdropFilter: 'blur(12px)'
+              }}
+            >
+              {/* Sidebar Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
+                  <History size={18} style={{ color: 'var(--accent)' }} />
+                  <span>{t('tree_change_history')}</span>
+                </h3>
+                <button 
+                  onClick={() => setShowHistorySidebar(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Sidebar Content */}
+              <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {historyLoading ? (
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                    <div className="loading-spinner"></div>
+                  </div>
+                ) : historyError ? (
+                  <div style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>{historyError}</div>
+                ) : historyLogs.length > 0 ? (
+                  historyLogs.map((log, index) => {
+                    const dateVal = new Date(log.timestamp);
+                    const formattedDate = dateVal.toLocaleDateString(isFa ? 'fa-IR' : 'en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+
+                    return (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          fontSize: '0.82rem', 
+                          color: 'var(--text-secondary)', 
+                          background: 'rgba(255,255,255,0.02)', 
+                          border: '1px solid var(--border-color)', 
+                          borderRadius: '6px', 
+                          padding: '0.75rem' 
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{log.changedBy}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{formattedDate}</span>
+                        </div>
+                        <div style={{ textDirection: 'ltr', textAlign: 'start', marginBottom: '0.25rem' }}>
+                          {log.description}
+                        </div>
+                        <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '0.25rem', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{t('history_member_label')}</span>
+                          <Link 
+                            to={`/tree/${treeId}/profile/${log.personId}`}
+                            style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}
+                          >
+                            {log.personName} ↗
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
+                    {t('no_history_logs')}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* 6. Collaborators Management Modal */}

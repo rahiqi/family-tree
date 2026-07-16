@@ -31,6 +31,21 @@ public class TreeController : ControllerBase
         return User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
     }
 
+    private async Task<string?> GetUserRoleAsync(FamilyTree tree, Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user != null && user.IsSuperAdmin) return "owner";
+
+        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        return collaborator?.Role;
+    }
+
+    private async Task<bool> IsSuperAdminAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        return user?.IsSuperAdmin ?? false;
+    }
+
     public class CreateTreeDto
     {
         public string Name { get; set; } = string.Empty;
@@ -106,15 +121,13 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        var userRole = await GetUserRoleAsync(tree, userId);
         
         // If the tree is private and the user is not a collaborator, deny access
-        if (tree.IsPublic != true && collaborator == null)
+        if (tree.IsPublic != true && userRole == null)
         {
             return Forbid("You do not have access to this family tree.");
         }
-
-        var userRole = collaborator?.Role ?? "visitor";
 
         return Ok(new
         {
@@ -124,7 +137,7 @@ public class TreeController : ControllerBase
             tree.TreeGraphJsonData,
             tree.Collaborators,
             IsPublic = tree.IsPublic ?? false,
-            UserRole = userRole
+            UserRole = userRole ?? "visitor"
         });
     }
 
@@ -163,8 +176,8 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
-        if (collaborator == null || collaborator.Role != "owner")
+        var userRole = await GetUserRoleAsync(tree, userId);
+        if (userRole != "owner")
         {
             return Forbid("Only the tree owner can change the privacy settings.");
         }
@@ -186,8 +199,8 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
-        if (collaborator == null || collaborator.Role != "owner")
+        var userRole = await GetUserRoleAsync(tree, userId);
+        if (userRole != "owner")
         {
             return Forbid("Only the tree owner can delete the family tree.");
         }
@@ -216,13 +229,13 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
-        if (collaborator == null)
+        var userRole = await GetUserRoleAsync(tree, userId);
+        if (userRole == null)
         {
             return Forbid("You do not have access to this family tree.");
         }
 
-        if (collaborator.Role != "owner" && collaborator.Role != "editor")
+        if (userRole != "owner" && userRole != "editor")
         {
             return Forbid("You do not have permission to edit this family tree.");
         }
@@ -463,8 +476,8 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var currentUserCollab = tree.Collaborators.FirstOrDefault(c => c.UserId == currentUserId);
-        if (currentUserCollab == null || currentUserCollab.Role != "owner")
+        var currentUserRole = await GetUserRoleAsync(tree, currentUserId);
+        if (currentUserRole != "owner")
         {
             return Forbid("Only the owner can modify collaborators.");
         }
@@ -515,8 +528,8 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var currentUserCollab = tree.Collaborators.FirstOrDefault(c => c.UserId == currentUserId);
-        if (currentUserCollab == null || currentUserCollab.Role != "owner")
+        var currentUserRole = await GetUserRoleAsync(tree, currentUserId);
+        if (currentUserRole != "owner")
         {
             return Forbid("Only the owner can remove collaborators.");
         }
@@ -551,8 +564,8 @@ public class TreeController : ControllerBase
             return NotFound("Family tree not found.");
         }
 
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
-        if (tree.IsPublic != true && collaborator == null)
+        var userRole = await GetUserRoleAsync(tree, userId);
+        if (tree.IsPublic != true && userRole == null)
         {
             return Forbid("You do not have access to this family tree.");
         }

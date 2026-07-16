@@ -30,6 +30,9 @@ public class ProfileController : ControllerBase
 
     private async Task<string?> GetUserRoleAsync(Guid treeId, Guid userId)
     {
+        var user = await _context.Users.FindAsync(userId);
+        if (user != null && user.IsSuperAdmin) return "owner";
+
         var tree = await _context.FamilyTrees.FindAsync(treeId);
         if (tree == null) return null;
 
@@ -56,10 +59,10 @@ public class ProfileController : ControllerBase
         }
 
         var userId = GetCurrentUserId();
-        var collaborator = tree.Collaborators.FirstOrDefault(c => c.UserId == userId);
+        var userRole = await GetUserRoleAsync(treeId, userId);
         
         // If the tree is private and the user is not a collaborator, deny access
-        if (tree.IsPublic != true && collaborator == null)
+        if (tree.IsPublic != true && userRole == null)
         {
             return Forbid("You do not have access to this family tree.");
         }

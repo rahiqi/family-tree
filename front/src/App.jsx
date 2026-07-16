@@ -13,6 +13,7 @@ import TelegramEmailPrompt from './pages/TelegramEmailPrompt';
 import PartyForm from './pages/PartyForm';
 import PartyDetails from './pages/PartyDetails';
 import { CuteFamilyTreeLogo } from './components/CuteFamilyTreeLogo';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -75,6 +76,11 @@ function App() {
 
             {isLoggedIn ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {user.isSuperAdmin && (
+                  <Link to="/admin" className="nav-link" style={{ fontWeight: 'bold', color: 'var(--accent)' }}>
+                    🛡️ {t('admin_panel')}
+                  </Link>
+                )}
                 <Link to="/dashboard" className="nav-link">{t('dashboard')}</Link>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {user.firstName} {user.lastName}
@@ -106,6 +112,7 @@ function App() {
           <Route path="/tree/:treeId/party/new" element={isLoggedIn ? <PartyForm /> : <Navigate to="/auth/login" />} />
           <Route path="/tree/:treeId/party/:partyId" element={isLoggedIn ? <PartyDetails /> : <Navigate to="/auth/login" />} />
           <Route path="/tree/:treeId/party/:partyId/edit" element={isLoggedIn ? <PartyForm /> : <Navigate to="/auth/login" />} />
+          <Route path="/admin" element={isLoggedIn && user.isSuperAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

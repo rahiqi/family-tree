@@ -160,5 +160,28 @@ export const api = {
         body: formData
       });
     }
+  },
+  admin: {
+    getStats: () => request('/admin/stats'),
+    getUsers: () => request('/admin/users'),
+    updateUser: (userId, data) => 
+      request(`/admin/users/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    deleteUser: (userId) => 
+      request(`/admin/users/${userId}`, {
+        method: 'DELETE'
+      }),
+    getTrees: () => request('/admin/trees'),
+    updateTree: (treeId, data) => 
+      request(`/admin/trees/${treeId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    deleteTree: (treeId) => 
+      request(`/admin/trees/${treeId}`, {
+        method: 'DELETE'
+      })
   }
 };

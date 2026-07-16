@@ -55,6 +55,10 @@ public class AuthController : ControllerBase
             return BadRequest("User with this email already exists.");
         }
 
+        var isFirstUser = !await _context.Users.AnyAsync();
+        var superAdminEmail = _config["SuperAdminEmail"] ?? "admin@treely.ir";
+        var isSuperAdmin = isFirstUser || normalizedEmail == superAdminEmail.Trim().ToLowerInvariant();
+
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -62,14 +66,15 @@ public class AuthController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsSuperAdmin = isSuperAdmin
         };
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
-        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
+        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName, isSuperAdmin = user.IsSuperAdmin } });
     }
 
     [HttpPost("login")]
@@ -88,7 +93,7 @@ public class AuthController : ControllerBase
         }
 
         var token = GenerateJwtToken(user);
-        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
+        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName, isSuperAdmin = user.IsSuperAdmin } });
     }
 
     private string GenerateJwtToken(User user)
@@ -106,7 +111,8 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim("FirstName", user.FirstName),
-            new Claim("LastName", user.LastName)
+            new Claim("LastName", user.LastName),
+            new Claim("IsSuperAdmin", user.IsSuperAdmin.ToString().ToLowerInvariant())
         };
 
         var token = new JwtSecurityToken(
@@ -207,6 +213,10 @@ public class AuthController : ControllerBase
         var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId || u.Email == email);
         if (user == null)
         {
+            var isFirstUser = !await _context.Users.AnyAsync();
+            var superAdminEmail = _config["SuperAdminEmail"] ?? "admin@treely.ir";
+            var isSuperAdmin = isFirstUser || email.Trim().ToLowerInvariant() == superAdminEmail.Trim().ToLowerInvariant();
+
             user = new User
             {
                 Id = Guid.NewGuid(),
@@ -215,7 +225,8 @@ public class AuthController : ControllerBase
                 LastName = lastName,
                 PasswordHash = "",
                 GoogleId = googleId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                IsSuperAdmin = isSuperAdmin
             };
             _context.Users.Add(user);
         }
@@ -231,7 +242,7 @@ public class AuthController : ControllerBase
         await _context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
-        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
+        return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName, isSuperAdmin = user.IsSuperAdmin } });
     }
 
     [HttpPost("telegram")]
@@ -285,7 +296,7 @@ public class AuthController : ControllerBase
         if (user != null)
         {
             var token = GenerateJwtToken(user);
-            return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
+            return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName, isSuperAdmin = user.IsSuperAdmin } });
         }
         else
         {
@@ -302,6 +313,10 @@ public class AuthController : ControllerBase
                 return BadRequest(new { message = "Email is already in use" });
             }
 
+            var isFirstUser = !await _context.Users.AnyAsync();
+            var superAdminEmail = _config["SuperAdminEmail"] ?? "admin@treely.ir";
+            var isSuperAdmin = isFirstUser || dto.Email.Trim().ToLowerInvariant() == superAdminEmail.Trim().ToLowerInvariant();
+
             user = new User
             {
                 Id = Guid.NewGuid(),
@@ -310,14 +325,15 @@ public class AuthController : ControllerBase
                 LastName = dto.LastName ?? "",
                 PasswordHash = "",
                 TelegramId = telegramId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                IsSuperAdmin = isSuperAdmin
             };
             
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
-            return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName } });
+            return Ok(new { token, user = new { user.Id, user.Email, user.FirstName, user.LastName, isSuperAdmin = user.IsSuperAdmin } });
         }
     }
 

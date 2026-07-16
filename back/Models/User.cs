@@ -14,4 +14,5 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? GoogleId { get; set; }
     public string? TelegramId { get; set; }
+    public bool IsSuperAdmin { get; set; } = false;
 }

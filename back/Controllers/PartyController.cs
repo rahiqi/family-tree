@@ -39,6 +39,9 @@ public class PartyController : ControllerBase
 
     private async Task<string?> GetUserRoleAsync(Guid treeId, Guid userId)
     {
+        var user = await _context.Users.FindAsync(userId);
+        if (user != null && user.IsSuperAdmin) return "owner";
+
         var tree = await _context.FamilyTrees.FindAsync(treeId);
         if (tree == null) return null;
 
